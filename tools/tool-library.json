@@ -1,0 +1,145 @@
+{
+  "version": "0.1",
+  "updatedAt": "2026-05-24",
+  "starThreshold": 10000,
+  "policy": {
+    "vendorSourceIntoJavaRepo": false,
+    "defaultDeployment": "private-mirror-or-self-hosted-service",
+    "callPath": "/api/v1/tool-adapters/{code}/invoke",
+    "missingConfigBehavior": "return-501",
+    "failedToolBehavior": "return-502"
+  },
+  "tools": [
+    {
+      "code": "crawl4ai",
+      "name": "Crawl4AI",
+      "repo": "https://github.com/unclecode/crawl4ai",
+      "stars": 66171,
+      "license": "Apache-2.0",
+      "category": "MARKET_RESEARCH",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "crawl-url"
+    },
+    {
+      "code": "browser-use",
+      "name": "Browser Use",
+      "repo": "https://github.com/browser-use/browser-use",
+      "stars": 95302,
+      "license": "MIT",
+      "category": "MARKET_RESEARCH",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "research-agent"
+    },
+    {
+      "code": "scrapy",
+      "name": "Scrapy",
+      "repo": "https://github.com/scrapy/scrapy",
+      "stars": 61801,
+      "license": "BSD-3-Clause",
+      "category": "MARKET_RESEARCH",
+      "integrationMode": "SELF_HOSTED_WORKER",
+      "defaultOperation": "crawl-job"
+    },
+    {
+      "code": "promptflow",
+      "name": "Promptflow",
+      "repo": "https://github.com/microsoft/promptflow",
+      "stars": 11131,
+      "license": "MIT",
+      "category": "PROMPT_WORKFLOW",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "score"
+    },
+    {
+      "code": "langfuse",
+      "name": "Langfuse",
+      "repo": "https://github.com/langfuse/langfuse",
+      "stars": 27817,
+      "license": "NOASSERTION",
+      "category": "PROMPT_OBSERVABILITY",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "trace"
+    },
+    {
+      "code": "llava",
+      "name": "LLaVA",
+      "repo": "https://github.com/haotian-liu/LLaVA",
+      "stars": 24828,
+      "license": "Apache-2.0",
+      "category": "IMAGE_TO_PROMPT",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "image-to-prompt"
+    },
+    {
+      "code": "comfyui",
+      "name": "ComfyUI",
+      "repo": "https://github.com/Comfy-Org/ComfyUI",
+      "stars": 114287,
+      "license": "GPL-3.0",
+      "category": "IMAGE_GENERATION",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "image-generate"
+    },
+    {
+      "code": "controlnet",
+      "name": "ControlNet",
+      "repo": "https://github.com/lllyasviel/ControlNet",
+      "stars": 33893,
+      "license": "Apache-2.0",
+      "category": "IMAGE_CONTROL",
+      "integrationMode": "COMFYUI_WORKFLOW_NODE",
+      "defaultOperation": "control-image"
+    },
+    {
+      "code": "grounded-sam",
+      "name": "Grounded Segment Anything",
+      "repo": "https://github.com/IDEA-Research/Grounded-Segment-Anything",
+      "stars": 17582,
+      "license": "Apache-2.0",
+      "category": "SEGMENTATION",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "segment"
+    },
+    {
+      "code": "iopaint",
+      "name": "IOPaint",
+      "repo": "https://github.com/Sanster/IOPaint",
+      "stars": 23131,
+      "license": "Apache-2.0",
+      "category": "IMAGE_CLEANUP",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "inpaint"
+    },
+    {
+      "code": "real-esrgan",
+      "name": "Real-ESRGAN",
+      "repo": "https://github.com/xinntao/Real-ESRGAN",
+      "stars": 35525,
+      "license": "BSD-3-Clause",
+      "category": "IMAGE_ENHANCE",
+      "integrationMode": "SELF_HOSTED_HTTP_SERVICE",
+      "defaultOperation": "upscale"
+    },
+    {
+      "code": "imagemagick",
+      "name": "ImageMagick",
+      "repo": "https://github.com/ImageMagick/ImageMagick",
+      "stars": 16510,
+      "license": "NOASSERTION",
+      "category": "COMPOSITION_EXPORT",
+      "integrationMode": "LOCAL_CLI_OR_WORKER",
+      "defaultOperation": "compose"
+    },
+    {
+      "code": "playwright",
+      "name": "Playwright",
+      "repo": "https://github.com/microsoft/playwright",
+      "stars": 89319,
+      "license": "Apache-2.0",
+      "category": "VISUAL_QA",
+      "integrationMode": "LOCAL_CLI_OR_WORKER",
+      "defaultOperation": "verify-page"
+    }
+  ]
+}
+

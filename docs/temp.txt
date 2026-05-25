@@ -1,0 +1,678 @@
+﻿# 电商详情页 AI 工作台前端 UI 需求文档
+
+版本: v1.0
+日期: 2026-05-24
+适用范围: 第一版前端，仅对接当前真实后端能力
+
+## 1. 目标与边界
+
+第一版 UI 目标不是做完整电商后台，而是做一个能真实跑通的工作台：
+
+1. 商品资料上传与查看
+2. 详情页查看
+3. 审核提交与审核记录查看
+4. 导出发起与导出记录查看
+
+第一版只允许接入已存在且可用的后端能力。AI 相关入口保留，但明确显示“待接入本地 AI 服务”，不能返回假内容。
+
+### 1.1 设计原则
+
+1. 真实对接后端，不做伪数据
+2. 缺失接口明确禁用，不隐藏问题
+3. 以 `Result<T>` 作为统一返回结构
+4. 只使用真实 context-path：`/api/v1`
+5. Controller 路径不要重复写 `/api`
+
+### 1.2 当前后端真实能力
+
+已存在且可用的接口只有 8 个：
+
+- `POST /api/v1/material/upload`
+- `GET /api/v1/material/{id}`
+- `POST /api/v1/detail/generate`，但当前不可用，`AIUtil` 未实现
+- `GET /api/v1/detail/{id}`
+- `POST /api/v1/audit/submit`
+- `GET /api/v1/audit/product/{productDetailId}`
+- `POST /api/v1/export/export`
+- `GET /api/v1/export/{id}`
+
+---
+
+## 2. 第一版信息架构
+
+### 2.1 导航结构
+
+第一版只保留 5 个主入口：
+
+1. 商品资料
+2. 详情页
+3. 合规审查
+4. 审核中心
+5. 导出记录
+
+AI 生成功能作为独立入口保留，但显示禁用态。
+
+### 2.2 页面关系
+
+```
+商品资料导入/查看
+  -> 商品资料详情
+  -> 详情页查看
+  -> 合规审查
+  -> 审核中心
+  -> 导出记录
+```
+
+说明：
+
+- 第一版不做商品资料列表管理页，因为后端没有列表接口
+- 第一版不做详情页编辑保存页，因为后端没有保存/更新接口
+- 第一版不做导出下载页，因为后端没有下载接口
+- 第一版不做独立风险检查页，因为后端没有 risk-check REST 接口
+
+---
+
+## 3. 全局交互规范
+
+### 3.1 通用返回结构
+
+所有接口统一返回：
+
+- `code`
+- `message`
+- `data`
+- `timestamp`
+
+前端规则：
+
+- `code == 200` 视为成功
+- 其他状态统一进入错误态
+- `data` 为空时显示空态，不拼接假内容
+
+### 3.2 通用状态
+
+1. 加载中
+2. 成功
+3. 空数据
+4. 接口缺失
+5. 功能待接入
+6. 调用失败
+
+### 3.3 按钮规则
+
+- 可用接口对应按钮：正常展示并可点击
+- 不可用接口对应按钮：展示但禁用，附带说明
+- AI 按钮：保留入口，但默认禁用或弹出“待接入本地 AI 服务”
+
+---
+
+## 4. 页面需求
+
+### 4.1 商品资料页
+
+#### 页面目的
+
+完成商品资料上传和单条资料查看。
+
+#### 路由建议
+
+- `/materials/new`
+- `/materials/:id`
+
+#### 页面结构
+
+1. 基础信息卡片
+2. 素材列表卡片
+3. 上传结果卡片
+4. 后续流程入口卡片
+
+#### 表单字段
+
+来自 `ProductMaterialDTO`：
+
+- `brandId`
+- `brandName`
+- `productName`
+- `productSku`
+- `category`
+- `uploader`
+- `sku`
+- `price`
+- `description`
+- `images`
+- `videos`
+- `documents`
+
+#### 展示字段
+
+来自 `ProductMaterial`：
+
+- `id`
+- `brandId`
+- `brandName`
+- `productName`
+- `productSku`
+- `category`
+- `price`
+- `description`
+- `images`
+- `videos`
+- `documents`
+- `status`
+- `originalFilePath`
+- `fileType`
+- `fileSize`
+- `uploader`
+- `uploadTime`
+- `parseStatus`
+- `parseError`
+- `createTime`
+- `updateTime`
+
+#### 可用按钮
+
+- 上传商品资料
+- 查看详情
+- 进入详情页
+
+#### 禁用按钮
+
+- 商品资料列表
+- 搜索
+- 编辑
+- 删除
+- 批量操作
+
+#### 接口依赖
+
+- `POST /api/v1/material/upload`
+- `GET /api/v1/material/{id}`
+
+#### 说明
+
+第一版不提供资料列表页，因为缺少列表接口。  
+如果需要从一个列表进入详情，必须等后续补齐查询接口。
+
+---
+
+### 4.2 详情页
+
+#### 页面目的
+
+展示详情页内容、素材引用和 AI 生成入口。
+
+#### 路由建议
+
+- `/details/:id`
+
+#### 页面结构
+
+1. 详情页基础信息
+2. 文本内容展示
+3. 图片/视频/文档引用区
+4. 审核状态区
+5. AI 入口区
+
+#### 展示字段
+
+来自 `ProductDetail`：
+
+- `id`
+- `materialId`
+- `productName`
+- `brandId`
+- `brandName`
+- `title`
+- `subtitle`
+- `sellingPoints`
+- `seoKeywords`
+- `imageTemplateId`
+- `sku`
+- `category`
+- `price`
+- `description`
+- `aiGeneratedContent`
+- `images`
+- `videos`
+- `documents`
+- `riskLevel`
+- `riskDescription`
+- `auditStatus`
+- `auditor`
+- `auditTime`
+- `auditComment`
+- `version`
+- `isCurrentVersion`
+- `creator`
+- `updater`
+- `createTime`
+- `updateTime`
+
+#### 可用按钮
+
+- 返回商品资料
+- 查看审核记录
+- 发起审核
+
+#### 禁用按钮
+
+- 保存
+- 更新
+- 删除
+- 重新生成详情
+- 风险检查
+
+#### AI 入口状态
+
+详情页中保留以下入口，但全部显示为禁用态：
+
+- AI 生成标题
+- AI 生成副标题
+- AI 生成卖点
+- AI 生成详情内容
+- AI 生成 FAQ
+- AI 生成 SEO 关键词
+
+状态文案统一为：
+
+> 待接入本地 AI 服务
+
+#### 接口依赖
+
+- `GET /api/v1/detail/{id}`
+- `POST /api/v1/audit/submit`
+
+#### 说明
+
+`POST /api/v1/detail/generate` 虽然存在，但当前不可用，因为 `AIUtil` 未实现。  
+前端只能保留入口，不能假装已经能生成详情页。
+
+---
+
+### 4.3 合规审查页
+
+#### 页面目的
+
+发起审核提交，查看审核记录。
+
+#### 路由建议
+
+- `/details/:id/review`
+
+#### 页面结构
+
+1. 当前详情摘要
+2. 审核表单
+3. 审核记录展示
+4. 风险提示区
+
+#### 表单字段
+
+来自 `AuditDTO`：
+
+- `productDetailId`
+- `auditStatus`
+- `auditComment`
+- `auditor`
+- `riskLevel`
+- `submitter`
+
+#### 展示字段
+
+来自 `AuditRecord`：
+
+- `id`
+- `productDetailId`
+- `auditType`
+- `auditStatus`
+- `riskLevel`
+- `riskItems`
+- `auditComment`
+- `modificationSuggestions`
+- `submitter`
+- `submitTime`
+- `auditor`
+- `auditTime`
+- `auditDuration`
+
+#### 可用按钮
+
+- 提交审核
+- 查看审核记录
+
+#### 禁用按钮
+
+- 独立风险检查
+- 风险结果重算
+- 自动放行
+- 自动拦截
+
+#### 接口依赖
+
+- `POST /api/v1/audit/submit`
+- `GET /api/v1/audit/product/{productDetailId}`
+
+#### 说明
+
+当前后端没有独立的 `risk-check` REST 接口。  
+UI 中的“合规审查”只能基于审核提交和审核记录展示，不应写成独立风险引擎已完成。
+
+---
+
+### 4.4 审核中心
+
+#### 页面目的
+
+按商品详情 ID 查询审核记录，并处理人工审核流转。
+
+#### 路由建议
+
+- `/audit`
+
+#### 页面结构
+
+1. 查询区
+2. 审核记录区
+3. 状态说明区
+
+#### 查询字段
+
+- `productDetailId`
+
+#### 展示字段
+
+同 `AuditRecord`
+
+#### 可用按钮
+
+- 查询审核记录
+- 提交审核
+
+#### 禁用按钮
+
+- 审核列表分页
+- 审核通过
+- 审核驳回
+- 审核退回
+- 批量处理
+
+#### 接口依赖
+
+- `GET /api/v1/audit/product/{productDetailId}`
+- `POST /api/v1/audit/submit`
+
+#### 说明
+
+当前只有“按商品详情查审核记录”的能力，没有审核列表、审批流转和批量处理接口。  
+所以这一页只能做单记录查询，不应包装成完整审核中台。
+
+---
+
+### 4.5 导出记录页
+
+#### 页面目的
+
+发起导出，查看导出记录。
+
+#### 路由建议
+
+- `/exports`
+- `/exports/:id`
+
+#### 页面结构
+
+1. 导出表单
+2. 导出结果展示
+3. 单条导出记录详情
+
+#### 表单字段
+
+来自 `ExportDTO`：
+
+- `productDetailId`
+- `exportFormat`
+- `exporter`
+
+#### 支持格式
+
+- `WORD`
+- `MARKDOWN`
+- `JSON`
+- `HTML`
+- `TXT`
+
+#### 禁用格式
+
+- `PDF`
+
+#### 展示字段
+
+来自 `ExportRecord`：
+
+- `id`
+- `productDetailId`
+- `exportFormat`
+- `filePath`
+- `fileName`
+- `fileSize`
+- `exportStatus`
+- `errorMessage`
+- `exporter`
+- `exportTime`
+
+#### 可用按钮
+
+- 发起导出
+- 查看导出记录
+
+#### 禁用按钮
+
+- 列表分页
+- 直接下载
+- 删除记录
+
+#### 接口依赖
+
+- `POST /api/v1/export/export`
+- `GET /api/v1/export/{id}`
+
+#### 说明
+
+当前没有导出列表接口，也没有下载接口。  
+UI 不能写成“点击立即下载文件”，只能写成“查看导出记录”和“展示导出结果状态”。
+
+---
+
+## 5. API 对照表
+
+### 5.1 已实现且可用
+
+| 页面 | 功能 | 方法 | 路径 | 说明 |
+|-----|------|------|------|------|
+| 商品资料 | 上传 | POST | `/api/v1/material/upload` | 可用 |
+| 商品资料 | 查看单条 | GET | `/api/v1/material/{id}` | 可用 |
+| 详情页 | 查看单条 | GET | `/api/v1/detail/{id}` | 可用 |
+| 审核 | 提交审核 | POST | `/api/v1/audit/submit` | 可用 |
+| 审核 | 查询审核记录 | GET | `/api/v1/audit/product/{productDetailId}` | 可用 |
+| 导出 | 发起导出 | POST | `/api/v1/export/export` | 可用 |
+| 导出 | 查询导出记录 | GET | `/api/v1/export/{id}` | 可用 |
+
+### 5.2 已存在但当前不可用
+
+| 页面 | 功能 | 方法 | 路径 | 说明 |
+|-----|------|------|------|------|
+| 详情页 | AI 生成详情 | POST | `/api/v1/detail/generate` | 接口存在，但 `AIUtil` 未实现，调用会抛 `UnsupportedOperationException` |
+
+### 5.3 缺失接口
+
+| 页面 | 缺失能力 | 方法 | 路径 | 影响 |
+|-----|---------|------|------|------|
+| 商品资料 | 列表查询 | GET | `/api/v1/material/list` | 无法做列表页 |
+| 商品资料 | 更新 | PUT | `/api/v1/material/{id}` | 无法编辑保存 |
+| 商品资料 | 删除 | DELETE | `/api/v1/material/{id}` | 无法删除 |
+| 详情页 | 保存草稿 | PUT | `/api/v1/detail/{id}` | 无法编辑保存 |
+| 详情页 | 删除 | DELETE | `/api/v1/detail/{id}` | 无法删除 |
+| 详情页 | 风险检查 | POST | `/api/v1/detail/{id}/risk-check` | 无法做独立风控 |
+| 详情页 | 风险结果查询 | GET | `/api/v1/detail/{id}/risk` | 无法展示独立风险结果 |
+| 审核中心 | 审核列表 | GET | `/api/v1/audit/list` | 无法做列表页 |
+| 审核中心 | 审核通过 | PUT | `/api/v1/audit/{id}/approve` | 无法走审批流转 |
+| 审核中心 | 审核驳回 | PUT | `/api/v1/audit/{id}/reject` | 无法走审批流转 |
+| 审核中心 | 审核退回 | PUT | `/api/v1/audit/{id}/return` | 无法走审批流转 |
+| 导出 | 列表 | GET | `/api/v1/export/list` | 无法做导出历史列表 |
+| 导出 | 下载 | GET | `/api/v1/export/{id}/download` | 无法直接下载文件 |
+| 导出 | 删除 | DELETE | `/api/v1/export/{id}` | 无法删除记录 |
+
+---
+
+## 6. 字段与界面映射
+
+### 6.1 商品资料字段
+
+| 字段 | 类型 | UI 展示 |
+|-----|------|--------|
+| brandId | Long | 输入框 / 只读展示 |
+| brandName | String | 输入框 |
+| productName | String | 输入框 |
+| productSku | String | 输入框 |
+| category | String | 下拉或输入框 |
+| uploader | String | 输入框 |
+| sku | String | 输入框 |
+| price | BigDecimal | 数字输入框 |
+| description | String | 文本域 |
+| images | List<String> | 图片列表 |
+| videos | List<String> | 视频列表 |
+| documents | List<String> | 文件列表 |
+
+### 6.2 详情页字段
+
+| 字段 | 类型 | UI 展示 |
+|-----|------|--------|
+| title | String | 文本输入 / 只读展示 |
+| subtitle | String | 文本输入 / 只读展示 |
+| sellingPoints | String 或 JSON 数组 | 标签组 / 富文本 |
+| seoKeywords | String 或 JSON 数组 | 标签组 |
+| aiGeneratedContent | String | 原始内容预览 |
+| riskLevel | String | 风险标签 |
+| auditStatus | Integer | 状态标签 |
+
+### 6.3 审核字段
+
+| 字段 | 类型 | UI 展示 |
+|-----|------|--------|
+| auditStatus | Integer | 选择器 |
+| auditComment | String | 文本域 |
+| auditor | String | 输入框 |
+| riskLevel | Integer | 选择器 |
+| submitter | String | 输入框 |
+
+### 6.4 导出字段
+
+| 字段 | 类型 | UI 展示 |
+|-----|------|--------|
+| exportFormat | String | 下拉框 |
+| exporter | String | 输入框 |
+| filePath | String | 只读文本 |
+| fileName | String | 只读文本 |
+| fileSize | Long | 只读文本 |
+| exportStatus | Integer | 状态标签 |
+| errorMessage | String | 错误提示 |
+
+---
+
+## 7. 按钮状态规范
+
+### 7.1 可点击
+
+- 上传商品资料
+- 查看单条资料
+- 提交审核
+- 查询审核记录
+- 发起导出
+- 查询导出记录
+
+### 7.2 禁用并显示原因
+
+- AI 生成标题
+- AI 生成副标题
+- AI 生成卖点
+- AI 生成详情内容
+- AI 生成 FAQ
+- AI 生成 SEO 关键词
+- 风险检查
+- 保存草稿
+- 更新资料
+- 删除资料
+- 审核通过
+- 审核驳回
+- 审核退回
+- 导出下载
+
+统一文案：
+
+> 当前接口未实现，待后端补齐
+
+对于 AI：
+
+> 待接入本地 AI 服务
+
+---
+
+## 8. 空态与错误态文案
+
+### 8.1 空态
+
+- 商品资料暂无数据
+- 详情页暂无内容
+- 审核记录为空
+- 导出记录为空
+- AI 功能待接入本地服务
+
+### 8.2 错误态
+
+- 接口不存在
+- 接口已存在但当前不可用
+- 后端返回失败
+- 参数校验失败
+- 网络异常
+
+### 8.3 风险提示
+
+如果用户点击 AI 入口，前端必须明确提示：
+
+> 当前 AI 能力未接入本地服务，不能返回生成结果
+
+如果用户尝试风险检查，前端必须提示：
+
+> 当前后端没有独立风险检查接口，请先使用审核提交流程
+
+---
+
+## 9. 第一版明确不做的内容
+
+1. 商品资料列表管理页
+2. 商品资料编辑保存页
+3. 商品资料删除
+4. 详情页编辑保存页
+5. 详情页删除
+6. 独立风险检查页
+7. 审核通过/驳回/退回流转
+8. 导出下载
+9. 导出列表页
+10. 任何真实 AI 生成
+11. 任何伪数据回填
+
+---
+
+## 10. 结论
+
+第一版 UI 的正确形态不是“完整后台”，而是“真实后端驱动的工作台”。
+
+当前可交付的体验是：
+
+- 能上传商品资料
+- 能查看单条资料和详情
+- 能提交审核并查看审核记录
+- 能发起导出并查看导出记录
+- 能保留 AI 入口，但不假装已接入
+
+后续等列表、保存、删除、风险检查、下载、AI 接入接口补齐后，再扩展为完整详情页工作流。
