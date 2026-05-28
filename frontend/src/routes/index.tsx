@@ -1,4 +1,4 @@
-import { Suspense, lazy, type ReactNode } from "react";
+﻿import { Suspense, lazy, type ReactNode } from "react";
 import { createBrowserRouter, type RouteObject, type RouterProviderProps } from "react-router-dom";
 import { EmptyState, LoadingState } from "../components/common";
 import WorkbenchLayout from "../layouts/WorkbenchLayout";
@@ -28,6 +28,7 @@ const ToolDetailPage = lazy(() => import("../pages/tools/ToolDetailPage"));
 const CategoryVisualPoliciesPage = lazy(() => import("../pages/visual/CategoryVisualPoliciesPage"));
 const ModelProfilesPage = lazy(() => import("../pages/visual/ModelProfilesPage"));
 const PromptWorkbenchPage = lazy(() => import("../pages/visual/PromptWorkbenchPage"));
+const PromptTemplatePage = lazy(() => import("../pages/visual/PromptTemplatePage"));
 const VisualPlansPage = lazy(() => import("../pages/visual/VisualPlansPage"));
 const CostManagementPage = lazy(() => import("../pages/cost/CostManagementPage"));
 const DiagnosticsPage = lazy(() => import("../pages/system/DiagnosticsPage"));
@@ -68,6 +69,7 @@ const routes: RouteObject[] = [
       { path: "visual/category-policies", element: lazyRouteElement(<CategoryVisualPoliciesPage />) },
       { path: "visual/model-profiles", element: lazyRouteElement(<ModelProfilesPage />) },
       { path: "visual/prompt-workbench", element: lazyRouteElement(<PromptWorkbenchPage />) },
+      { path: "visual/prompt-templates", element: lazyRouteElement(<PromptTemplatePage />) },
       { path: "visual/plans", element: lazyRouteElement(<VisualPlansPage />) },
       { path: "cost", element: lazyRouteElement(<CostManagementPage />) },
       { path: "system/diagnostics", element: lazyRouteElement(<DiagnosticsPage />) },

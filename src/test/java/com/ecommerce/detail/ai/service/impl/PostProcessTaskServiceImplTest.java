@@ -181,7 +181,7 @@ class PostProcessTaskServiceImplTest {
         assertEquals("CANCELED", mapper.updatedTask.getStatus());
     }
 
-    // ©¤©¤ Helpers ©¤©¤
+    // -- Helpers --
 
     private static PostProcessTaskServiceImpl service(RecordingMapper mapper, ToolAdapterService toolAdapterService) {
         PostProcessTaskServiceImpl svc = new PostProcessTaskServiceImpl();

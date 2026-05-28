@@ -887,3 +887,57 @@ export type TeamRole = {
   permissions?: string[];
   createTime?: string;
 };
+
+export type PromptTemplate = {
+  id?: number;
+  templateName?: string;
+  category?: string;
+  sceneType?: string;
+  platform?: string;
+  style?: string;
+  positivePrompt?: string;
+  negativePrompt?: string;
+  styleTags?: string[];
+  constraints?: string[];
+  description?: string;
+  previewImageUrl?: string;
+  usageCount?: number;
+  rating?: number;
+  source?: string;
+  sourceRef?: string;
+  language?: string;
+  author?: string;
+  tags?: string[];
+  status?: string;
+  createTime?: string;
+  updateTime?: string;
+};
+
+export type PromptTemplateCreateRequest = {
+  templateName: string;
+  category: string;
+  sceneType?: string;
+  platform?: string;
+  style?: string;
+  positivePrompt: string;
+  negativePrompt?: string;
+  styleTags?: string[];
+  constraints?: string[];
+  description?: string;
+  previewImageUrl?: string;
+  source?: string;
+  sourceRef?: string;
+  language?: string;
+  author?: string;
+  tags?: string[];
+};
+
+export type PromptTemplateQuery = {
+  pageNum?: number;
+  pageSize?: number;
+  category?: string;
+  platform?: string;
+  style?: string;
+  source?: string;
+  keyword?: string;
+};

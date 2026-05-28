@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ApiResult,
   ApplyGenerationResultsRequest,
   AssetOcrTask,
@@ -76,7 +76,10 @@ import type {
   PublishCheckSummary,
   OperationAuditLog,
   TeamUser,
-  TeamRole
+  TeamRole,
+  PromptTemplate,
+  PromptTemplateCreateRequest,
+  PromptTemplateQuery
 } from "./types";
 
 const API_BASE = "/api/v1";
@@ -766,6 +769,19 @@ export const visualPlanApi = {
     request<VisualPlanBatchResults>(buildPath(`/visual-plans/${id}/batch-results`, slot ? { slot } : {}))
 };
 
+
+export const promptTemplateApi = {
+  list: (query: PromptTemplateQuery = {}) =>
+    requestPage<PromptTemplate>(buildPath("/prompt-templates/list", normalizePageQuery(query))),
+  get: (id: number) => request<PromptTemplate>(`/prompt-templates/${id}`),
+  create: (payload: PromptTemplateCreateRequest) =>
+    request<PromptTemplate>("/prompt-templates", { method: "POST", body: payload }),
+  update: (id: number, payload: Partial<PromptTemplateCreateRequest>) =>
+    request<PromptTemplate>(`/prompt-templates/${id}`, { method: "PUT", body: payload }),
+  delete: (id: number) => request<void>(`/prompt-templates/${id}`, { method: "DELETE" }),
+  duplicate: (id: number) => request<PromptTemplate>(`/prompt-templates/${id}/duplicate`, { method: "POST" }),
+  use: (id: number) => request<void>(`/prompt-templates/${id}/use`, { method: "POST" })
+};
 export const teamApi = {
   listUsers: (query: Record<string, unknown> = {}) =>
     requestPage<TeamUser>(buildPath("/team/users/list", normalizePageQuery(query as PageQuery))),
@@ -867,7 +883,8 @@ export const api = {
   system: systemApi,
   publishChecks: publishCheckApi,
   team: teamApi,
-  auditLogs: auditLogApi
+  auditLogs: auditLogApi,
+  promptTemplates: promptTemplateApi
 };
 
 

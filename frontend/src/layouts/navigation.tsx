@@ -1,4 +1,4 @@
-import {
+﻿import {
   AppstoreOutlined,
   AuditOutlined,
   DollarOutlined,
@@ -52,6 +52,7 @@ export const navigationItems: MenuProps["items"] = [
       { key: "/visual/category-policies", label: "Category Policies" },
       { key: "/visual/model-profiles", label: "Model Profiles" },
       { key: "/visual/prompt-workbench", label: "Prompt Workbench" },
+      { key: "/visual/prompt-templates", label: "Prompt Templates" },
       { key: "/visual/plans", label: "Visual Plans" }
     ]
   },
@@ -99,6 +100,7 @@ export const getSelectedKey = (pathname: string) => {
   if (pathname.startsWith("/visual/category-policies")) return "/visual/category-policies";
   if (pathname.startsWith("/visual/model-profiles")) return "/visual/model-profiles";
   if (pathname.startsWith("/visual/prompt-workbench")) return "/visual/prompt-workbench";
+  if (pathname.startsWith("/visual/prompt-templates")) return "/visual/prompt-templates";
   if (pathname.startsWith("/visual/plans")) return "/visual/plans";
   if (pathname.startsWith("/tools/imports")) return "/tools/imports";
   if (pathname.startsWith("/tools/design-draft")) return "/tools/design-draft";
