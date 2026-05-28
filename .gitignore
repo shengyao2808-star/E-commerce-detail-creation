@@ -38,3 +38,9 @@ frontend/dist/
 
 ### Mac OS ###
 .DS_Store
+
+### Runtime artifacts ###
+logs/
+exports/
+null
+package-lock.json

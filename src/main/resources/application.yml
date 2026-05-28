@@ -131,6 +131,13 @@ tools:
       base-url: ${TOOL_IMAGEMAGICK_BASE_URL:}
       api-key: ${TOOL_IMAGEMAGICK_API_KEY:}
       timeout-seconds: ${TOOL_IMAGEMAGICK_TIMEOUT_SECONDS:300}
+      allowed-input-roots: ${TOOL_IMAGEMAGICK_ALLOWED_INPUT_ROOTS:exports,uploads}
+      allowed-output-roots: ${TOOL_IMAGEMAGICK_ALLOWED_OUTPUT_ROOTS:exports/detail-compositions}
+      operations:
+        compose:
+          path: ${TOOL_IMAGEMAGICK_COMPOSE_PATH:/compose}
+        stitch:
+          path: ${TOOL_IMAGEMAGICK_STITCH_PATH:/stitch}
     playwright:
       enabled: ${TOOL_PLAYWRIGHT_ENABLED:false}
       base-url: ${TOOL_PLAYWRIGHT_BASE_URL:}
@@ -159,6 +166,9 @@ business:
   cache:
     ttl: 3600
     max-size: 1000
+
+  image-job:
+    poll-fixed-delay-ms: ${IMAGE_JOB_POLL_FIXED_DELAY_MS:30000}
 
 # 日志配置
 logging:
