@@ -10,6 +10,7 @@ import com.ecommerce.detail.ai.mapper.ProductMaterialMapper;
 import com.ecommerce.detail.ai.service.ProductMaterialService;
 import com.ecommerce.detail.ai.util.AIUtil;
 import com.ecommerce.detail.ai.util.FileUtil;
+import com.ecommerce.detail.ai.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,26 +18,34 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
- * 商品素材服务实现类
- * 
- * @author Administrator
- * @version 1.0.0
+ * Product material service.
+ * P5.3: validates file paths for traversal and allowed file types on upload.
  */
 @Slf4j
 @Service
 public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMapper, ProductMaterial> implements ProductMaterialService {
+
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(
+            "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg");
+    private static final Set<String> ALLOWED_VIDEO_EXTENSIONS = Set.of(
+            "mp4", "avi", "mov", "wmv", "flv", "mkv", "webm");
+    private static final Set<String> ALLOWED_DOCUMENT_EXTENSIONS = Set.of(
+            "txt", "doc", "docx", "pdf", "csv", "xls", "xlsx", "ppt", "pptx", "md");
 
     @Autowired
     private AIUtil aiUtil;
 
     @Override
     public Long uploadMaterial(ProductMaterialDTO dto) {
-        // 参数校验
         if (dto == null || dto.getProductName() == null || dto.getProductName().trim().isEmpty()) {
-            throw new IllegalArgumentException("商品名称不能为空");
+            throw new IllegalArgumentException("Product name must not be empty");
         }
+
+        // P5.3: validate file paths for traversal and file types
+        validateFilePaths(dto);
 
         ProductMaterial material = new ProductMaterial();
         material.setProductName(dto.getProductName());
@@ -50,9 +59,9 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
         material.setUploader(dto.getUploader());
         material.setUploadTime(LocalDateTime.now());
         material.setStatus(1);
-        
+
         this.save(material);
-        log.info("上传商品素材成功，ID: {}, 商品名: {}", material.getId(), material.getProductName());
+        log.info("Upload material success, ID: {}", material.getId());
         return material.getId();
     }
 
@@ -69,31 +78,27 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
                 uploadMaterial(dto);
                 successCount++;
             } catch (Exception e) {
-                log.error("批量上传素材失败，商品名: {}", dto.getProductName(), e);
+                log.error("Batch upload material failed", e);
             }
         }
-        
-        log.info("批量上传完成，总数: {}, 成功: {}", dtos.size(), successCount);
+        log.info("Batch upload completed, total: {}, success: {}", dtos.size(), successCount);
         return successCount;
     }
 
     @Override
     public ProductMaterial getMaterialById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID不能为空");
+            throw new IllegalArgumentException("ID must not be null");
         }
-        
         ProductMaterial material = this.getById(id);
         if (material == null) {
-            throw new RuntimeException("素材不存在，ID: " + id);
+            throw new RuntimeException("Material not found, ID: " + id);
         }
-        
         return material;
     }
 
     @Override
     public PageResult<ProductMaterial> listMaterials(int pageNum, int pageSize, String keyword) {
-        // 参数校验和默认值设置
         if (pageNum < 1) {
             pageNum = 1;
         }
@@ -103,8 +108,6 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
 
         Page<ProductMaterial> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<ProductMaterial> wrapper = new LambdaQueryWrapper<>();
-        
-        // 关键词搜索
         if (keyword != null && !keyword.trim().isEmpty()) {
             wrapper.like(ProductMaterial::getProductName, keyword)
                    .or()
@@ -112,27 +115,25 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
                    .or()
                    .like(ProductMaterial::getCategory, keyword);
         }
-        
-        // 按上传时间倒序排列
         wrapper.orderByDesc(ProductMaterial::getUploadTime);
-        
         Page<ProductMaterial> resultPage = this.page(page, wrapper);
-        
         return new PageResult<>(resultPage.getTotal(), resultPage.getRecords(), pageNum, pageSize);
     }
 
     @Override
     public boolean updateMaterial(Long id, ProductMaterialDTO dto) {
         if (id == null || dto == null) {
-            throw new IllegalArgumentException("参数不能为空");
+            throw new IllegalArgumentException("Parameters must not be null");
         }
 
         ProductMaterial existing = this.getById(id);
         if (existing == null) {
-            throw new RuntimeException("素材不存在，ID: " + id);
+            throw new RuntimeException("Material not found, ID: " + id);
         }
 
-        // 更新字段
+        // P5.3: validate updated file paths
+        validateFilePaths(dto);
+
         if (dto.getProductName() != null) {
             existing.setProductName(dto.getProductName());
         }
@@ -159,7 +160,7 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
         }
 
         boolean result = this.updateById(existing);
-        log.info("更新商品素材{}，ID: {}", result ? "成功" : "失败", id);
+        log.info("Update material {}, ID: {}", result ? "success" : "failed", id);
         return result;
     }
 
@@ -167,15 +168,12 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteMaterial(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID不能为空");
+            throw new IllegalArgumentException("ID must not be null");
         }
-
         ProductMaterial material = this.getById(id);
         if (material == null) {
-            throw new RuntimeException("素材不存在，ID: " + id);
+            throw new RuntimeException("Material not found, ID: " + id);
         }
-
-        // 删除关联文件（如果有）
         if (material.getImages() != null) {
             FileUtil.deleteFiles(material.getImages());
         }
@@ -185,9 +183,8 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
         if (material.getDocuments() != null) {
             FileUtil.deleteFiles(material.getDocuments());
         }
-
         boolean result = this.removeById(id);
-        log.info("删除商品素材{}，ID: {}", result ? "成功" : "失败", id);
+        log.info("Delete material {}, ID: {}", result ? "success" : "failed", id);
         return result;
     }
 
@@ -197,7 +194,6 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
         if (ids == null || ids.isEmpty()) {
             return 0;
         }
-
         int deleteCount = 0;
         for (Long id : ids) {
             try {
@@ -205,78 +201,94 @@ public class ProductMaterialServiceImpl extends ServiceImpl<ProductMaterialMappe
                     deleteCount++;
                 }
             } catch (Exception e) {
-                log.error("批量删除素材失败，ID: {}", id, e);
+                log.error("Batch delete material failed, ID: {}", id, e);
             }
         }
-        
-        log.info("批量删除完成，总数: {}, 成功: {}", ids.size(), deleteCount);
+        log.info("Batch delete completed, total: {}, success: {}", ids.size(), deleteCount);
         return deleteCount;
     }
 
     @Override
     public String parseMaterialContent(Long id) {
         ProductMaterial material = getMaterialById(id);
-        
         StringBuilder content = new StringBuilder();
-        
-        // 解析图片（OCR）
+
         if (material.getImages() != null && !material.getImages().isEmpty()) {
             String ocrText = FileUtil.extractTextFromImages(material.getImages());
             if (ocrText != null && !ocrText.isEmpty()) {
-                content.append("【图片内容】\n").append(ocrText).append("\n\n");
+                content.append("[Image Content]\n").append(ocrText).append("\n\n");
             }
         }
-        
-        // 解析文档
+
         if (material.getDocuments() != null && !material.getDocuments().isEmpty()) {
             String docText = FileUtil.extractTextFromDocuments(material.getDocuments());
             if (docText != null && !docText.isEmpty()) {
-                content.append("【文档内容】\n").append(docText).append("\n\n");
+                content.append("[Document Content]\n").append(docText).append("\n\n");
             }
         }
-        
-        // 添加商品基本信息
-        content.append("【商品信息】\n")
-               .append("商品名称: ").append(material.getProductName()).append("\n")
-               .append("分类: ").append(material.getCategory()).append("\n")
+
+        content.append("[Product Info]\n")
+               .append("Name: ").append(material.getProductName()).append("\n")
+               .append("Category: ").append(material.getCategory()).append("\n")
                .append("SKU: ").append(material.getProductSku()).append("\n")
-               .append("价格: ").append(material.getPrice()).append("\n")
-               .append("描述: ").append(material.getDescription());
-        
+               .append("Price: ").append(material.getPrice()).append("\n")
+               .append("Description: ").append(material.getDescription());
+
         return content.toString();
     }
 
     @Override
     public boolean validateMaterial(Long id) {
         ProductMaterial material = getMaterialById(id);
-        
-        // 验证必填字段
+
         if (material.getProductName() == null || material.getProductName().trim().isEmpty()) {
-            log.warn("素材验证失败：商品名称为空，ID: {}", id);
+            log.warn("Material validation failed: product name is empty, ID: {}", id);
             return false;
         }
-        
         if (material.getProductSku() == null || material.getProductSku().trim().isEmpty()) {
-            log.warn("素材验证失败：SKU为空，ID: {}", id);
+            log.warn("Material validation failed: SKU is empty, ID: {}", id);
             return false;
         }
-        
-        // 验证文件格式（如果有文件）
         if (material.getImages() != null && !material.getImages().isEmpty()) {
             if (!FileUtil.validateImageFiles(material.getImages())) {
-                log.warn("素材验证失败：图片格式不正确，ID: {}", id);
+                log.warn("Material validation failed: image format invalid, ID: {}", id);
                 return false;
             }
         }
-        
         if (material.getVideos() != null && !material.getVideos().isEmpty()) {
             if (!FileUtil.validateVideoFiles(material.getVideos())) {
-                log.warn("素材验证失败：视频格式不正确，ID: {}", id);
+                log.warn("Material validation failed: video format invalid, ID: {}", id);
                 return false;
             }
         }
-        
-        log.info("素材验证通过，ID: {}", id);
+        log.info("Material validation passed, ID: {}", id);
         return true;
+    }
+
+    // ── P5.3 internal validation ──────────────────────────────────
+
+    /**
+     * Validates all file path lists in the DTO for path traversal and
+     * file extension allowlist.
+     */
+    private void validateFilePaths(ProductMaterialDTO dto) {
+        if (dto.getImages() != null) {
+            SecurityUtil.rejectPathTraversalInList(dto.getImages(), "image path");
+            for (String img : dto.getImages()) {
+                SecurityUtil.requireAllowedExtension(img, ALLOWED_IMAGE_EXTENSIONS, "image file");
+            }
+        }
+        if (dto.getVideos() != null) {
+            SecurityUtil.rejectPathTraversalInList(dto.getVideos(), "video path");
+            for (String vid : dto.getVideos()) {
+                SecurityUtil.requireAllowedExtension(vid, ALLOWED_VIDEO_EXTENSIONS, "video file");
+            }
+        }
+        if (dto.getDocuments() != null) {
+            SecurityUtil.rejectPathTraversalInList(dto.getDocuments(), "document path");
+            for (String doc : dto.getDocuments()) {
+                SecurityUtil.requireAllowedExtension(doc, ALLOWED_DOCUMENT_EXTENSIONS, "document file");
+            }
+        }
     }
 }

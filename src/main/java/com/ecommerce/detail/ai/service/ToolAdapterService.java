@@ -12,5 +12,7 @@ public interface ToolAdapterService {
 
     ToolAdapterInfoDTO getTool(String code);
 
+    String getBaseUrl(String code);
+
     ToolInvokeResponseDTO invoke(String code, ToolInvokeRequestDTO request);
 }

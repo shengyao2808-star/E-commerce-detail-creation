@@ -3,12 +3,20 @@ package com.ecommerce.detail.ai.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ecommerce.detail.ai.common.PageResult;
+import com.ecommerce.detail.ai.dto.ApplyGenerationResultsDTO;
 import com.ecommerce.detail.ai.dto.DetailRiskResultDTO;
 import com.ecommerce.detail.ai.dto.ProductDetailDTO;
 import com.ecommerce.detail.ai.entity.BrandTemplate;
+import com.ecommerce.detail.ai.entity.DetailGenerationResultLink;
+import com.ecommerce.detail.ai.entity.GenerationResult;
 import com.ecommerce.detail.ai.entity.ProductDetail;
 import com.ecommerce.detail.ai.mapper.BrandTemplateMapper;
+import com.ecommerce.detail.ai.mapper.DetailGenerationResultLinkMapper;
+import com.ecommerce.detail.ai.mapper.GenerationResultMapper;
 import com.ecommerce.detail.ai.mapper.ProductDetailMapper;
 import com.ecommerce.detail.ai.service.ProductDetailService;
 import com.ecommerce.detail.ai.util.AIUtil;
@@ -18,11 +26,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 商品详情页服务实现类
@@ -33,6 +45,12 @@ import java.util.Map;
 @Slf4j
 @Service
 public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, ProductDetail> implements ProductDetailService {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<List<String>> STRING_LIST_TYPE = new TypeReference<List<String>>() {};
+
+    @Autowired(required = false)
+    private ObjectMapper objectMapper = OBJECT_MAPPER;
 
     @Autowired
     private BrandTemplateMapper brandTemplateMapper;
@@ -45,6 +63,12 @@ public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, P
 
     @Autowired
     private RiskCheckUtil riskCheckUtil;
+
+    @Autowired(required = false)
+    private GenerationResultMapper generationResultMapper;
+
+    @Autowired(required = false)
+    private DetailGenerationResultLinkMapper detailGenerationResultLinkMapper;
 
     @Override
     public Long generateProductDetail(ProductDetailDTO dto) {
@@ -74,6 +98,7 @@ public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, P
         detail.setSubtitle(dto.getSubtitle());
         detail.setSellingPoints(dto.getSellingPoints() != null ? String.join(",", dto.getSellingPoints()) : null);
         detail.setSeoKeywords(dto.getSeoKeywords() != null ? String.join(",", dto.getSeoKeywords()) : null);
+        detail.setModuleOrder(serializeModuleOrder(dto.getModuleOrder()));
         detail.setImageTemplateId(dto.getImageTemplateId());
         detail.setAiGeneratedContent(aiContent);
         detail.setRiskLevel(riskLevel);
@@ -185,12 +210,61 @@ public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, P
         if (dto.getAiGeneratedContent() != null) {
             existing.setAiGeneratedContent(dto.getAiGeneratedContent());
         }
+        if (dto.getModuleOrder() != null) {
+            existing.setModuleOrder(serializeModuleOrder(dto.getModuleOrder()));
+        }
 
         existing.setUpdateTime(LocalDateTime.now());
 
         boolean result = this.updateById(existing);
         log.info("更新商品详情页{}，ID: {}", result ? "成功" : "失败", id);
         return result;
+    }
+
+    @Override
+    public List<String> getModuleOrder(Long id) {
+        ProductDetail detail = getProductDetailById(id);
+        return parseModuleOrder(detail.getModuleOrder());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateModuleOrder(Long id, List<String> moduleOrder) {
+        ProductDetail detail = getProductDetailById(id);
+        detail.setModuleOrder(serializeModuleOrder(moduleOrder));
+        detail.setUpdateTime(LocalDateTime.now());
+        return this.updateById(detail);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int applyGenerationResults(Long id, ApplyGenerationResultsDTO dto) {
+        if (generationResultMapper == null || detailGenerationResultLinkMapper == null) {
+            throw new IllegalStateException("Generation result persistence is not available");
+        }
+
+        ProductDetail detail = getProductDetailById(id);
+        List<GenerationResult> selectedResults = resolveGenerationResults(dto);
+        if (selectedResults.isEmpty()) {
+            throw new IllegalArgumentException("No selected generation results are available to apply");
+        }
+
+        LinkedHashSet<String> mergedImages = new LinkedHashSet<>(parseStringList(detail.getImages()));
+        int appliedCount = 0;
+        for (GenerationResult result : selectedResults) {
+            String resultUrl = normalizeText(result.getResultUrl());
+            if (!StringUtils.hasText(resultUrl)) {
+                throw new IllegalArgumentException("Generation result resultUrl must not be blank");
+            }
+            mergedImages.add(resultUrl);
+            upsertGenerationResultLink(detail.getId(), result.getId(), resultUrl);
+            appliedCount++;
+        }
+
+        detail.setImages(writeStringList(new ArrayList<>(mergedImages)));
+        detail.setUpdateTime(LocalDateTime.now());
+        this.updateById(detail);
+        return appliedCount;
     }
 
     @Override
@@ -456,6 +530,121 @@ public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, P
         return value == null || value.trim().isEmpty();
     }
 
+    private List<String> parseModuleOrder(String moduleOrder) {
+        if (isBlank(moduleOrder)) {
+            return Collections.emptyList();
+        }
+        try {
+            return objectMapper.readValue(moduleOrder, STRING_LIST_TYPE);
+        } catch (Exception e) {
+            throw new RuntimeException("解析模块顺序失败", e);
+        }
+    }
+
+    private List<GenerationResult> resolveGenerationResults(ApplyGenerationResultsDTO dto) {
+        List<GenerationResult> persisted = generationResultMapper.selectList(new LambdaQueryWrapper<>());
+        if (persisted == null || persisted.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> requestedIds = dto == null || dto.getGenerationResultIds() == null
+                ? Collections.emptyList()
+                : dto.getGenerationResultIds().stream()
+                        .filter(java.util.Objects::nonNull)
+                        .distinct()
+                        .toList();
+        if (!requestedIds.isEmpty()) {
+            Set<Long> requested = new LinkedHashSet<>(requestedIds);
+            List<GenerationResult> results = new ArrayList<>();
+            for (GenerationResult result : persisted) {
+                if (result != null && result.getId() != null && requested.contains(result.getId())) {
+                    results.add(result);
+                }
+            }
+            return results;
+        }
+
+        boolean selectedOnly = dto == null || dto.getSelectedOnly() == null || dto.getSelectedOnly();
+        if (!selectedOnly) {
+            return Collections.emptyList();
+        }
+
+        List<GenerationResult> results = new ArrayList<>();
+        for (GenerationResult result : persisted) {
+            if (result != null && Integer.valueOf(1).equals(result.getSelected())) {
+                results.add(result);
+            }
+        }
+        return results;
+    }
+
+    private void upsertGenerationResultLink(Long productDetailId, Long generationResultId, String resultUrl) {
+        List<DetailGenerationResultLink> existingLinks = detailGenerationResultLinkMapper.selectList(new LambdaQueryWrapper<>());
+        DetailGenerationResultLink existing = null;
+        if (existingLinks != null) {
+            for (DetailGenerationResultLink candidate : existingLinks) {
+                if (candidate != null
+                        && productDetailId.equals(candidate.getProductDetailId())
+                        && generationResultId.equals(candidate.getGenerationResultId())) {
+                    existing = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (existing == null) {
+            DetailGenerationResultLink link = new DetailGenerationResultLink();
+            link.setProductDetailId(productDetailId);
+            link.setGenerationResultId(generationResultId);
+            link.setResultUrl(resultUrl);
+            link.setCreateTime(LocalDateTime.now());
+            link.setUpdateTime(LocalDateTime.now());
+            detailGenerationResultLinkMapper.insert(link);
+            return;
+        }
+
+        existing.setResultUrl(resultUrl);
+        existing.setUpdateTime(LocalDateTime.now());
+        detailGenerationResultLinkMapper.updateById(existing);
+    }
+
+    private List<String> parseStringList(String value) {
+        if (!StringUtils.hasText(value)) {
+            return Collections.emptyList();
+        }
+        try {
+            return objectMapper.readValue(value, STRING_LIST_TYPE);
+        } catch (Exception e) {
+            List<String> values = new ArrayList<>();
+            for (String item : value.split("[,\\n]")) {
+                if (StringUtils.hasText(item)) {
+                    values.add(item.trim());
+                }
+            }
+            return values;
+        }
+    }
+
+    private String writeStringList(List<String> values) {
+        try {
+            return objectMapper.writeValueAsString(values == null ? Collections.emptyList() : values);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("淇濆瓨鍒楄〃瀛楁澶辫触", e);
+        }
+    }
+
+    private String normalizeText(String value) {
+        return value == null ? null : value.trim();
+    }
+
+    private String serializeModuleOrder(List<String> moduleOrder) {
+        try {
+            return objectMapper.writeValueAsString(moduleOrder != null ? moduleOrder : Collections.emptyList());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("保存模块顺序失败", e);
+        }
+    }
+
     /**
      * 将ProductDetail实体转换为ProductDetailDTO
      */
@@ -464,7 +653,7 @@ public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, P
         dto.setProductId(detail.getId());
         dto.setMaterialId(detail.getMaterialId());
         dto.setBrandId(detail.getBrandId());
-        dto.setProductName(detail.getTitle());
+        dto.setProductName(detail.getProductName() != null ? detail.getProductName() : detail.getTitle());
         dto.setTitle(detail.getTitle());
         dto.setSubtitle(detail.getSubtitle());
         dto.setCategory(detail.getCategory());
@@ -473,28 +662,19 @@ public class ProductDetailServiceImpl extends ServiceImpl<ProductDetailMapper, P
         dto.setDescription(detail.getDescription());
 
         // 解析sellingPoints字符串为List
-        if (detail.getSellingPoints() != null && !detail.getSellingPoints().isEmpty()) {
-            dto.setSellingPoints(java.util.Arrays.asList(detail.getSellingPoints().split(",")));
-        }
+        dto.setSellingPoints(parseStringList(detail.getSellingPoints()));
 
         // 解析seoKeywords字符串为List
-        if (detail.getSeoKeywords() != null && !detail.getSeoKeywords().isEmpty()) {
-            dto.setSeoKeywords(java.util.Arrays.asList(detail.getSeoKeywords().split(",")));
-        }
+        dto.setSeoKeywords(parseStringList(detail.getSeoKeywords()));
 
+        dto.setModuleOrder(parseModuleOrder(detail.getModuleOrder()));
         dto.setImageTemplateId(detail.getImageTemplateId());
         dto.setAiGeneratedContent(detail.getAiGeneratedContent());
 
         // 解析images、videos、documents字符串为List（假设它们以逗号分隔）
-        if (detail.getImages() != null && !detail.getImages().isEmpty()) {
-            dto.setImages(java.util.Arrays.asList(detail.getImages().split(",")));
-        }
-        if (detail.getVideos() != null && !detail.getVideos().isEmpty()) {
-            dto.setVideos(java.util.Arrays.asList(detail.getVideos().split(",")));
-        }
-        if (detail.getDocuments() != null && !detail.getDocuments().isEmpty()) {
-            dto.setDocuments(java.util.Arrays.asList(detail.getDocuments().split(",")));
-        }
+        dto.setImages(parseStringList(detail.getImages()));
+        dto.setVideos(parseStringList(detail.getVideos()));
+        dto.setDocuments(parseStringList(detail.getDocuments()));
 
         return dto;
     }

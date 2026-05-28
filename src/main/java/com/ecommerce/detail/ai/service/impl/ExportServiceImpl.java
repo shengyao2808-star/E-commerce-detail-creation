@@ -13,12 +13,16 @@ import com.ecommerce.detail.ai.mapper.ExportRecordMapper;
 import com.ecommerce.detail.ai.mapper.ProductDetailMapper;
 import com.ecommerce.detail.ai.service.ExportService;
 import com.ecommerce.detail.ai.util.ExportUtil;
+import com.ecommerce.detail.ai.util.LocalPathPolicy;
+import com.ecommerce.detail.ai.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -27,21 +31,36 @@ import java.util.List;
 @Service
 public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRecord> implements ExportService {
 
+    private static final List<String> DEFAULT_EXPORT_ROOTS = List.of("exports");
+
     @Autowired
     private ExportUtil exportUtil;
 
     @Autowired
     private ProductDetailMapper productDetailMapper;
 
+    @Autowired(required = false)
+    private Environment environment;
+
     @Override
     public Long exportProductDetail(ExportDTO dto) {
         if (dto == null || dto.getProductDetailId() == null) {
-            throw new IllegalArgumentException("商品详情页ID不能为空");
+            throw new IllegalArgumentException("Product detail ID must not be null");
         }
 
         ExportFormat exportFormat = ExportFormat.fromValue(dto.getExportFormat());
         if (!exportFormat.isImplemented()) {
             throw new UnsupportedOperationException("PDF export is not implemented");
+        }
+
+        // P5.3 compliance gate: audit must be approved before export
+        ProductDetail detail = getProductDetailOrThrow(dto.getProductDetailId());
+        Integer auditStatus = detail.getAuditStatus();
+        if (auditStatus == null || auditStatus != 2) {
+            throw new IllegalStateException(
+                    "Export not allowed: product detail audit status is "
+                    + SecurityUtil.auditStatusLabel(auditStatus)
+                    + ", requires APPROVED");
         }
 
         ExportRecord record = new ExportRecord();
@@ -53,17 +72,19 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
         this.save(record);
 
         try {
-            ProductDetail detail = getProductDetailOrThrow(dto.getProductDetailId());
             String filePath = exportUtil.exportProductDetail(convertToDTO(detail), null, dto.getExportFormat());
-            record.setFilePath(filePath);
+            // P5.3: validate that the exported file lands inside allowed roots
+            Path resolvedPath = LocalPathPolicy.requirePathWithinRoots(
+                    filePath, allowedExportRoots(), "export output");
+            record.setFilePath(resolvedPath.toString());
             record.setExportStatus(1);
             record.setErrorMessage(null);
             this.updateById(record);
         } catch (Exception e) {
             record.setExportStatus(2);
-            record.setErrorMessage(e.getMessage());
+            record.setErrorMessage(SecurityUtil.scrubLocalPaths(e.getMessage()));
             this.updateById(record);
-            throw new RuntimeException("导出失败: " + e.getMessage(), e);
+            throw new RuntimeException("Export failed", e);
         }
         return record.getId();
     }
@@ -89,11 +110,11 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
     @Override
     public ExportRecord getExportById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("导出记录ID不能为空");
+            throw new IllegalArgumentException("Export record ID must not be null");
         }
         ExportRecord record = this.getById(id);
         if (record == null) {
-            throw new RuntimeException("导出记录不存在，ID: " + id);
+            throw new com.ecommerce.detail.ai.exception.ResourceNotFoundException("Export record not found, ID: " + id);
         }
         return record;
     }
@@ -124,11 +145,21 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
     @Transactional(rollbackFor = Exception.class)
     public boolean reexport(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("导出记录ID不能为空");
+            throw new IllegalArgumentException("Export record ID must not be null");
         }
         ExportRecord record = this.getById(id);
         if (record == null) {
-            throw new RuntimeException("导出记录不存在，ID: " + id);
+            throw new com.ecommerce.detail.ai.exception.ResourceNotFoundException("Export record not found, ID: " + id);
+        }
+
+        // P5.3 compliance gate: re-check audit approval
+        ProductDetail detail = getProductDetailOrThrow(record.getProductDetailId());
+        Integer auditStatus = detail.getAuditStatus();
+        if (auditStatus == null || auditStatus != 2) {
+            throw new IllegalStateException(
+                    "Re-export not allowed: product detail audit status is "
+                    + SecurityUtil.auditStatusLabel(auditStatus)
+                    + ", requires APPROVED");
         }
 
         record.setExportStatus(0);
@@ -137,17 +168,18 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
         this.updateById(record);
 
         try {
-            ProductDetail detail = getProductDetailOrThrow(record.getProductDetailId());
             String filePath = exportUtil.exportProductDetail(convertToDTO(detail), null, record.getExportFormat());
-            record.setFilePath(filePath);
+            Path resolvedPath = LocalPathPolicy.requirePathWithinRoots(
+                    filePath, allowedExportRoots(), "export output");
+            record.setFilePath(resolvedPath.toString());
             record.setExportStatus(1);
             this.updateById(record);
             return true;
         } catch (Exception e) {
             record.setExportStatus(2);
-            record.setErrorMessage(e.getMessage());
+            record.setErrorMessage(SecurityUtil.scrubLocalPaths(e.getMessage()));
             this.updateById(record);
-            throw new RuntimeException("重新导出失败: " + e.getMessage(), e);
+            throw new RuntimeException("Re-export failed", e);
         }
     }
 
@@ -155,17 +187,20 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteExport(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("导出记录ID不能为空");
+            throw new IllegalArgumentException("Export record ID must not be null");
         }
         ExportRecord record = this.getById(id);
         if (record == null) {
-            throw new RuntimeException("导出记录不存在，ID: " + id);
+            throw new com.ecommerce.detail.ai.exception.ResourceNotFoundException("Export record not found, ID: " + id);
         }
         if (record.getFilePath() != null && !record.getFilePath().trim().isEmpty()) {
             try {
-                java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(record.getFilePath()));
+                // P5.3: only delete files inside allowed roots
+                Path filePath = LocalPathPolicy.requirePathWithinRoots(
+                        record.getFilePath(), allowedExportRoots(), "export file");
+                java.nio.file.Files.deleteIfExists(filePath);
             } catch (Exception e) {
-                log.warn("Failed to delete export file: {}", record.getFilePath(), e);
+                log.warn("Failed to delete export file");
             }
         }
         return this.removeById(id);
@@ -175,15 +210,19 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
     public ExportRecord downloadExportFile(Long id) {
         ExportRecord record = getExportById(id);
         if (record.getExportStatus() != 1) {
-            throw new RuntimeException("导出未完成或失败，无法下载");
+            throw new IllegalStateException("Export not completed or failed, cannot download");
         }
         if (record.getFilePath() == null || record.getFilePath().trim().isEmpty()) {
-            throw new RuntimeException("导出文件路径不存在");
+            throw new IllegalStateException("Export file path is missing");
         }
 
-        File file = new File(record.getFilePath());
+        // P5.3: enforce path whitelist before serving download
+        Path filePath = LocalPathPolicy.requirePathWithinRoots(
+                record.getFilePath(), allowedExportRoots(), "download file");
+
+        File file = filePath.toFile();
         if (!file.exists() || !file.isFile()) {
-            throw new RuntimeException("导出文件不存在，路径: " + record.getFilePath());
+            throw new IllegalStateException("Export file does not exist");
         }
         if (record.getFileName() == null || record.getFileName().trim().isEmpty()) {
             record.setFileName(file.getName());
@@ -197,9 +236,16 @@ public class ExportServiceImpl extends ServiceImpl<ExportRecordMapper, ExportRec
     private ProductDetail getProductDetailOrThrow(Long productDetailId) {
         ProductDetail detail = productDetailMapper.selectById(productDetailId);
         if (detail == null) {
-            throw new RuntimeException("商品详情页不存在，ID: " + productDetailId);
+            throw new com.ecommerce.detail.ai.exception.ResourceNotFoundException("Product detail not found, ID: " + productDetailId);
         }
         return detail;
+    }
+
+    private List<Path> allowedExportRoots() {
+        String configuredRoots = environment == null
+                ? ""
+                : environment.getProperty("security.allowed-export-roots", "");
+        return LocalPathPolicy.parseAllowedRoots(configuredRoots, DEFAULT_EXPORT_ROOTS);
     }
 
     private ProductDetailDTO convertToDTO(ProductDetail detail) {

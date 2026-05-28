@@ -6,11 +6,15 @@ import com.ecommerce.detail.ai.dto.tool.ToolInvokeResponseDTO;
 import com.ecommerce.detail.ai.exception.ResourceNotFoundException;
 import com.ecommerce.detail.ai.exception.ToolAdapterException;
 import com.ecommerce.detail.ai.service.ToolAdapterService;
+import com.ecommerce.detail.ai.util.LocalPathPolicy;
+import com.ecommerce.detail.ai.util.FileUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -26,12 +30,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 @Service
 public class ToolAdapterServiceImpl implements ToolAdapterService {
 
     private static final Map<String, ToolDefinition> TOOL_DEFINITIONS = createToolDefinitions();
     private static final Set<String> ALLOWED_HTTP_METHODS = Set.of("GET", "POST", "PUT", "PATCH", "DELETE");
+    private static final List<String> DEFAULT_IMAGEMAGICK_INPUT_ROOTS = List.of("exports", "uploads");
+    private static final List<String> DEFAULT_IMAGEMAGICK_OUTPUT_ROOTS = List.of("exports/detail-compositions");
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "webp", "bmp", "gif");
+    private static final Pattern PIXEL_RATIO_PATTERN = Pattern.compile("^\\d+x(?:\\d+|auto)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ASPECT_RATIO_PATTERN = Pattern.compile("^\\d+:\\d+$");
 
     private final Environment environment;
     private final ObjectMapper objectMapper;
@@ -56,6 +66,12 @@ public class ToolAdapterServiceImpl implements ToolAdapterService {
     }
 
     @Override
+    public String getBaseUrl(String code) {
+        requireTool(code);
+        return property(code, "base-url", "");
+    }
+
+    @Override
     public ToolInvokeResponseDTO invoke(String code, ToolInvokeRequestDTO request) {
         ToolDefinition tool = requireTool(code);
         if (!isEnabled(tool.code())) {
@@ -71,10 +87,11 @@ public class ToolAdapterServiceImpl implements ToolAdapterService {
         String method = resolveMethod(tool.code(), operation);
         String path = resolvePath(tool, operation);
         int timeoutSeconds = integerProperty(tool.code(), "timeout-seconds", 120);
+        Map<String, Object> normalizedPayload = normalizePayload(tool.code(), operation, request.getPayload());
 
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
-                    .uri(resolveUri(baseUrl, path, request.getPayload()))
+                    .uri(resolveUri(baseUrl, path, normalizedPayload))
                     .timeout(Duration.ofSeconds(timeoutSeconds))
                     .header("Content-Type", "application/json");
 
@@ -90,7 +107,7 @@ public class ToolAdapterServiceImpl implements ToolAdapterService {
                 builder.GET();
             } else {
                 String body = objectMapper.writeValueAsString(
-                        request.getPayload() == null ? Map.of() : request.getPayload());
+                        normalizedPayload);
                 builder.method(method, HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8));
             }
 
@@ -129,6 +146,88 @@ public class ToolAdapterServiceImpl implements ToolAdapterService {
                     + "' for tool adapter operation: " + code + "/" + operation);
         }
         return method;
+    }
+
+    private Map<String, Object> normalizePayload(String code, String operation, Map<String, Object> payload) {
+        Map<String, Object> normalizedPayload = payload == null ? new LinkedHashMap<>() : new LinkedHashMap<>(payload);
+        if ("imagemagick".equals(code) && ("compose".equals(operation) || "stitch".equals(operation))) {
+            validateImageMagickPayload(normalizedPayload, operation);
+        }
+        return normalizedPayload;
+    }
+
+    private void validateImageMagickPayload(Map<String, Object> payload, String operation) {
+        List<String> inputImages = readStringList(payload.get("inputImages"), "inputImages");
+        if (inputImages.isEmpty()) {
+            throw new IllegalArgumentException("inputImages must contain at least one local image path");
+        }
+
+        List<Path> allowedInputRoots = LocalPathPolicy.parseAllowedRoots(
+                property("imagemagick", "allowed-input-roots", ""),
+                DEFAULT_IMAGEMAGICK_INPUT_ROOTS);
+        List<Path> allowedOutputRoots = LocalPathPolicy.parseAllowedRoots(
+                property("imagemagick", "allowed-output-roots", ""),
+                DEFAULT_IMAGEMAGICK_OUTPUT_ROOTS);
+
+        List<String> normalizedInputImages = new ArrayList<>();
+        Set<Path> seen = new LinkedHashSet<>();
+        for (String inputImage : inputImages) {
+            Path inputPath = LocalPathPolicy.requirePathWithinRoots(inputImage, allowedInputRoots, "input image");
+            if (!Files.isRegularFile(inputPath)) {
+                throw new IllegalArgumentException("input image does not exist: " + inputImage);
+            }
+            if (!Files.isReadable(inputPath)) {
+                throw new IllegalArgumentException("input image is not readable: " + inputImage);
+            }
+            String extension = FileUtil.getFileExtension(inputPath.getFileName().toString());
+            if (!ALLOWED_IMAGE_EXTENSIONS.contains(extension)) {
+                throw new IllegalArgumentException("input image format is not supported: " + inputImage);
+            }
+            if (!seen.add(inputPath)) {
+                throw new IllegalArgumentException("inputImages must not contain duplicate local files");
+            }
+            normalizedInputImages.add(LocalPathPolicy.toFileUri(inputPath));
+        }
+        payload.put("inputImages", normalizedInputImages);
+
+        String outputRatio = payloadValue(payload, "outputRatio");
+        if (StringUtils.hasText(outputRatio)
+                && !PIXEL_RATIO_PATTERN.matcher(outputRatio).matches()
+                && !ASPECT_RATIO_PATTERN.matcher(outputRatio).matches()) {
+            throw new IllegalArgumentException("outputRatio must match 750xauto, 750x1334, or 3:4");
+        }
+
+        String outputPath = payloadValue(payload, "outputPath");
+        if (!StringUtils.hasText(outputPath)) {
+            throw new IllegalArgumentException("outputPath must not be blank");
+        }
+        Path normalizedOutputPath = LocalPathPolicy.requirePathWithinRoots(outputPath, allowedOutputRoots, "output path");
+        payload.put("outputPath", normalizedOutputPath.toString());
+
+        if ("stitch".equals(operation) && normalizedInputImages.size() < 2) {
+            throw new IllegalArgumentException("stitch requires at least two input images");
+        }
+    }
+
+    private String payloadValue(Map<String, Object> payload, String key) {
+        Object value = payload.get(key);
+        return value == null ? null : String.valueOf(value).trim();
+    }
+
+    private List<String> readStringList(Object value, String key) {
+        if (value == null) {
+            return List.of();
+        }
+        if (value instanceof List<?> list) {
+            List<String> values = new ArrayList<>();
+            for (Object item : list) {
+                if (item != null && StringUtils.hasText(String.valueOf(item))) {
+                    values.add(String.valueOf(item).trim());
+                }
+            }
+            return values;
+        }
+        throw new IllegalArgumentException(key + " must be an array of local file paths");
     }
 
     private String resolvePath(ToolDefinition tool, String operation) {

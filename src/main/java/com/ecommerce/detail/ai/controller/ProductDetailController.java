@@ -2,12 +2,15 @@ package com.ecommerce.detail.ai.controller;
 
 import com.ecommerce.detail.ai.common.Result;
 import com.ecommerce.detail.ai.common.PageResult;
+import com.ecommerce.detail.ai.dto.ApplyGenerationResultsDTO;
 import com.ecommerce.detail.ai.dto.DetailRiskResultDTO;
 import com.ecommerce.detail.ai.dto.ProductDetailDTO;
 import com.ecommerce.detail.ai.entity.ProductDetail;
 import com.ecommerce.detail.ai.service.ProductDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 商品详情页控制器
@@ -60,6 +63,25 @@ public class ProductDetailController {
     public Result<Boolean> updateProductDetail(@PathVariable Long id, @RequestBody ProductDetailDTO dto) {
         boolean result = productDetailService.updateProductDetail(id, dto);
         return Result.success(result);
+    }
+
+    @GetMapping("/{id}/module-order")
+    public Result<List<String>> getModuleOrder(@PathVariable Long id) {
+        List<String> moduleOrder = productDetailService.getModuleOrder(id);
+        return Result.success(moduleOrder);
+    }
+
+    @PutMapping("/{id}/module-order")
+    public Result<Boolean> updateModuleOrder(@PathVariable Long id, @RequestBody List<String> moduleOrder) {
+        boolean result = productDetailService.updateModuleOrder(id, moduleOrder);
+        return Result.success(result);
+    }
+
+    @PostMapping("/{id}/generation-results/apply")
+    public Result<Integer> applyGenerationResults(
+            @PathVariable Long id,
+            @RequestBody(required = false) ApplyGenerationResultsDTO dto) {
+        return Result.success(productDetailService.applyGenerationResults(id, dto));
     }
 
     @DeleteMapping("/{id}")

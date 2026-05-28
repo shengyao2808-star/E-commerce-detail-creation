@@ -3,6 +3,7 @@ package com.ecommerce.detail.ai.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ecommerce.detail.ai.common.PageResult;
+import com.ecommerce.detail.ai.dto.ApplyGenerationResultsDTO;
 import com.ecommerce.detail.ai.dto.DetailRiskResultDTO;
 import com.ecommerce.detail.ai.dto.ProductDetailDTO;
 import com.ecommerce.detail.ai.entity.ProductDetail;
@@ -60,6 +61,12 @@ public interface ProductDetailService extends IService<ProductDetail> {
      * @return 是否成功
      */
     boolean updateProductDetail(Long id, ProductDetailDTO dto);
+
+    List<String> getModuleOrder(Long id);
+
+    boolean updateModuleOrder(Long id, List<String> moduleOrder);
+
+    int applyGenerationResults(Long id, ApplyGenerationResultsDTO dto);
 
     /**
      * 删除商品详情页
