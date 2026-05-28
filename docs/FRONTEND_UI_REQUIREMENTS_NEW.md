@@ -70,3 +70,25 @@ P0 主链路已完成。商品资料、详情页、审核、导出都已接入�
 
 - P0: 已完成并可用。
 - P1/P2: 仅保留明确的未来工作标记。
+
+## 6. P2 Backend Task APIs
+
+| Domain | Method | Path | Notes |
+|---|---|---|---|
+| Research tasks | GET | `/api/v1/research/tasks/list` | Real persisted task list, no fake research rows |
+| Research tasks | POST | `/api/v1/research/tasks` | Create a real task record |
+| Research tasks | GET | `/api/v1/research/tasks/{id}` | Load task detail |
+| Research tasks | PUT | `/api/v1/research/tasks/{id}/status` | Update task status only |
+| Research tasks | PUT | `/api/v1/research/tasks/{id}/result` | Persist real chart result JSON |
+| Research tasks | GET | `/api/v1/research/tasks/{id}/charts` | Return stored chart data or empty arrays |
+| OCR tasks | GET | `/api/v1/assets/ocr-tasks/list` | Real persisted OCR task list |
+| OCR tasks | POST | `/api/v1/assets/ocr-tasks` | Create OCR task record |
+| OCR tasks | GET | `/api/v1/assets/ocr-tasks/{id}` | Load OCR task detail |
+| OCR tasks | PUT | `/api/v1/assets/ocr-tasks/{id}/status` | Update OCR status/progress |
+| OCR tasks | PUT | `/api/v1/assets/ocr-tasks/{id}/result` | Persist real OCR text/confidence |
+| Design drafts | GET | `/api/v1/design-drafts/list` | List saved Excalidraw drafts |
+| Design drafts | POST | `/api/v1/design-drafts` | Create a draft |
+| Design drafts | GET | `/api/v1/design-drafts/{id}` | Load a draft |
+| Design drafts | PUT | `/api/v1/design-drafts/{id}` | Update draft scene JSON |
+| Detail module order | GET | `/api/v1/detail/{id}/module-order` | Load persisted module order |
+| Detail module order | PUT | `/api/v1/detail/{id}/module-order` | Save module order JSON array |
