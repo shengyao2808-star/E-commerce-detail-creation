@@ -10,7 +10,7 @@ type AiPendingNoticeProps = {
   onClose?: () => void;
 };
 
-const AI_PENDING_TEXT = "待接入本地 AI 服务";
+const AI_PENDING_TEXT = "Local AI service pending";
 
 export const AiPendingNotice = ({
   title,
@@ -20,10 +20,10 @@ export const AiPendingNotice = ({
   onClose
 }: AiPendingNoticeProps) => {
   const [open, setOpen] = useState(false);
-  const modalTitle = title ?? "AI 服务未连接";
+  const modalTitle = title ?? "AI service not connected";
   const modalMessage =
     message ??
-    "当前仅保留本地 AI 接入入口。生成、OCR、PDF 解析功能尚未实现，暂不可用。";
+    "This page only exposes the local AI entry point. Generation, OCR orchestration, and PDF extraction remain unavailable until a real service is connected.";
 
   return (
     <>
@@ -46,7 +46,7 @@ export const AiPendingNotice = ({
         }}
         footer={[
           <Button key="close" type="primary" onClick={() => setOpen(false)}>
-            关闭
+            Close
           </Button>
         ]}
       >
