@@ -77,6 +77,11 @@ public class ProductDetailDTO implements Serializable {
     private List<String> seoKeywords;
 
     /**
+     * 模块顺序列表
+     */
+    private List<String> moduleOrder;
+
+    /**
      * 图片模板ID
      */
     private Long imageTemplateId;

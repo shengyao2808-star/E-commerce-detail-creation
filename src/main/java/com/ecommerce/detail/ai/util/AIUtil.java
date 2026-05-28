@@ -259,4 +259,7 @@ public class AIUtil {
     private String nullToEmpty(String value) {
         return value == null ? "" : value;
     }
+    public String relayText(String systemPrompt, String userPrompt) {
+        return callRelay(systemPrompt, userPrompt);
+    }
 }

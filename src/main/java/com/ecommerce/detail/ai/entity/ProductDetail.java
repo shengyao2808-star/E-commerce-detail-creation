@@ -62,6 +62,12 @@ public class ProductDetail implements Serializable {
     private String seoKeywords;
 
     /**
+     * 模块顺序（JSON数组）
+     */
+    @TableField("module_order")
+    private String moduleOrder;
+
+    /**
      * 图片模板ID
      */
     private Long imageTemplateId;

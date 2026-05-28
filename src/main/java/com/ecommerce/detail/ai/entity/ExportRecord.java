@@ -7,10 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 导出记录实体类
- * 
- * @author Administrator
- * @version 1.0.0
+ * Export record entity with P3.12 manifest linkage.
  */
 @Data
 @TableName("export_record")
@@ -18,66 +15,54 @@ public class ExportRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键ID
-     */
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 商品详情页ID
-     */
+    /** Product detail ID */
     private Long productDetailId;
 
-    /**
-     * 导出格式（WORD/MARKDOWN/JSON/HTML）
-     */
+    /** Export format (WORD/MARKDOWN/JSON/HTML/TXT) */
     private String exportFormat;
 
-    /**
-     * 导出文件路径
-     */
+    /** Exported file path */
     private String filePath;
 
-    /**
-     * 文件名
-     */
+    /** File name */
     private String fileName;
 
-    /**
-     * 文件大小（字节）
-     */
+    /** File size in bytes */
     private Long fileSize;
 
-    /**
-     * 导出状态（0-待导出，1-导出中，2-成功，3-失败）
-     */
+    /** Export status (0=pending, 1=success, 2=failed) */
     private Integer exportStatus;
 
-    /**
-     * 错误信息
-     */
+    /** Error message */
     private String errorMessage;
 
-    /**
-     * 导出人
-     */
+    /** Exporter */
     private String exporter;
 
-    /**
-     * 导出时间
-     */
+    /** Export time */
     private LocalDateTime exportTime;
 
-    /**
-     * 逻辑删除标识
-     */
+    /** P3.12: linked detail composition ID */
+    private Long detailCompositionId;
+
+    /** P3.12: delivery manifest snapshot at export time */
+    private String manifestJson;
+
+    /** P3.12: manifest consistency check result */
+    private Boolean manifestConsistent;
+
+    /** P3.12: linked QA check ID */
+    private Long qaCheckId;
+
+    /** P3.12: QA status at export time */
+    private String qaStatus;
+
     @TableLogic
     private Integer deleted;
 
-    /**
-     * 创建时间
-     */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

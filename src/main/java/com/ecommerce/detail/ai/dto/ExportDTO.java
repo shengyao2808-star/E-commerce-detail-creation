@@ -7,31 +7,25 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * 导出传输对象
- * 
- * @author Administrator
- * @version 1.0.0
+ * Export request DTO with P3.12 manifest linkage.
  */
 @Data
 public class ExportDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 商品详情页ID
-     */
-    @NotNull(message = "商品详情页ID不能为空")
+    /** Product detail ID */
+    @NotNull(message = "productDetailId must not be null")
     private Long productDetailId;
 
-    /**
-     * 导出格式（WORD/MARKDOWN/JSON/HTML）
-     */
-    @NotBlank(message = "导出格式不能为空")
+    /** Export format (WORD/MARKDOWN/JSON/HTML/TXT) */
+    @NotBlank(message = "exportFormat must not be blank")
     private String exportFormat;
 
-    /**
-     * 导出人
-     */
-    @NotBlank(message = "导出人不能为空")
+    /** Exporter */
+    @NotBlank(message = "exporter must not be blank")
     private String exporter;
+
+    /** P3.12: optional detail composition ID to link export to a specific composition */
+    private Long detailCompositionId;
 }
