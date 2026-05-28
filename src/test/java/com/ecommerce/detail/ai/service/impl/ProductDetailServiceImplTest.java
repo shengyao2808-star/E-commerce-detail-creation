@@ -20,6 +20,38 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProductDetailServiceImplTest {
 
     @Test
+    void getModuleOrderReturnsEmptyListWhenPersistedValueMissing() {
+        ProductDetail detail = new ProductDetail();
+        detail.setId(6L);
+        detail.setTitle("模块顺序为空");
+        detail.setModuleOrder(null);
+
+        RecordingProductDetailMapper mapper = new RecordingProductDetailMapper(detail);
+        ProductDetailServiceImpl service = service(mapper, new RecordingRiskCheckUtil(riskResult("LOW", false, List.of(), Map.of(), List.of())));
+
+        List<String> moduleOrder = service.getModuleOrder(6L);
+
+        assertEquals(List.of(), moduleOrder);
+        assertEquals(0, mapper.updateCount);
+    }
+
+    @Test
+    void updateModuleOrderPersistsJsonArray() {
+        ProductDetail detail = new ProductDetail();
+        detail.setId(10L);
+        detail.setTitle("模块顺序持久化");
+
+        RecordingProductDetailMapper mapper = new RecordingProductDetailMapper(detail);
+        ProductDetailServiceImpl service = service(mapper, new RecordingRiskCheckUtil(riskResult("LOW", false, List.of(), Map.of(), List.of())));
+
+        boolean updated = service.updateModuleOrder(10L, List.of("标题", "卖点", "图片"));
+
+        assertTrue(updated);
+        assertEquals(1, mapper.updateCount);
+        assertEquals("[\"标题\",\"卖点\",\"图片\"]", mapper.updatedDetail.getModuleOrder());
+    }
+
+    @Test
     void checkProductDetailRiskPersistsRiskResultAndReturnsDto() {
         ProductDetail detail = new ProductDetail();
         detail.setId(7L);

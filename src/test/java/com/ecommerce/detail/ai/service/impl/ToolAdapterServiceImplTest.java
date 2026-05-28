@@ -14,6 +14,8 @@ import org.springframework.mock.env.MockEnvironment;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -136,6 +138,120 @@ class ToolAdapterServiceImplTest {
         IllegalStateException ex = assertThrows(IllegalStateException.class, () -> service.invoke("llava", request));
         assertTrue(ex.getMessage().contains("path"));
         assertTrue(ex.getMessage().contains("visual-qa"));
+    }
+
+    @Test
+    void imagemagickComposeRejectsPathTraversalAndDuplicateInputs() throws Exception {
+        Path root = Files.createTempDirectory("imagemagick-contract");
+        Path inputDir = Files.createDirectories(root.resolve("exports"));
+        Path outputDir = Files.createDirectories(root.resolve("exports/detail-compositions"));
+        Path input = createPng(inputDir.resolve("input.png"));
+
+        MockEnvironment environment = new MockEnvironment()
+                .withProperty("tools.adapters.imagemagick.enabled", "true")
+                .withProperty("tools.adapters.imagemagick.base-url", "http://127.0.0.1:18080")
+                .withProperty("tools.adapters.imagemagick.allowed-input-roots", inputDir.toString())
+                .withProperty("tools.adapters.imagemagick.allowed-output-roots", outputDir.toString());
+        ToolAdapterServiceImpl service = new ToolAdapterServiceImpl(environment, new ObjectMapper());
+
+        ToolInvokeRequestDTO traversal = new ToolInvokeRequestDTO();
+        traversal.setOperation("compose");
+        traversal.setPayload(Map.of(
+                "inputImages", List.of(input.toString()),
+                "outputRatio", "750xauto",
+                "outputPath", root.resolve("escape.png").toString()));
+
+        IllegalArgumentException outputEx = assertThrows(IllegalArgumentException.class, () -> service.invoke("imagemagick", traversal));
+        assertTrue(outputEx.getMessage().contains("output path"));
+
+        ToolInvokeRequestDTO duplicate = new ToolInvokeRequestDTO();
+        duplicate.setOperation("compose");
+        duplicate.setPayload(Map.of(
+                "inputImages", List.of(input.toString(), input.toString()),
+                "outputRatio", "750xauto",
+                "outputPath", outputDir.resolve("final.png").toString()));
+
+        IllegalArgumentException duplicateEx = assertThrows(IllegalArgumentException.class, () -> service.invoke("imagemagick", duplicate));
+        assertTrue(duplicateEx.getMessage().contains("duplicate"));
+    }
+
+    @Test
+    void imagemagickComposeRejectsIllegalRatioAndMissingInput() throws Exception {
+        Path root = Files.createTempDirectory("imagemagick-contract");
+        Path inputDir = Files.createDirectories(root.resolve("exports"));
+        Path outputDir = Files.createDirectories(root.resolve("exports/detail-compositions"));
+        Path input = createPng(inputDir.resolve("input.png"));
+
+        MockEnvironment environment = new MockEnvironment()
+                .withProperty("tools.adapters.imagemagick.enabled", "true")
+                .withProperty("tools.adapters.imagemagick.base-url", "http://127.0.0.1:18080")
+                .withProperty("tools.adapters.imagemagick.allowed-input-roots", inputDir.toString())
+                .withProperty("tools.adapters.imagemagick.allowed-output-roots", outputDir.toString());
+        ToolAdapterServiceImpl service = new ToolAdapterServiceImpl(environment, new ObjectMapper());
+
+        ToolInvokeRequestDTO ratio = new ToolInvokeRequestDTO();
+        ratio.setOperation("compose");
+        ratio.setPayload(Map.of(
+                "inputImages", List.of(input.toString()),
+                "outputRatio", "bad-ratio",
+                "outputPath", outputDir.resolve("final.png").toString()));
+
+        IllegalArgumentException ratioEx = assertThrows(IllegalArgumentException.class, () -> service.invoke("imagemagick", ratio));
+        assertTrue(ratioEx.getMessage().contains("outputRatio"));
+
+        ToolInvokeRequestDTO missingInput = new ToolInvokeRequestDTO();
+        missingInput.setOperation("compose");
+        missingInput.setPayload(Map.of(
+                "inputImages", List.of(),
+                "outputRatio", "750xauto",
+                "outputPath", outputDir.resolve("final.png").toString()));
+
+        IllegalArgumentException missingInputEx = assertThrows(IllegalArgumentException.class, () -> service.invoke("imagemagick", missingInput));
+        assertTrue(missingInputEx.getMessage().contains("inputImages"));
+    }
+
+    @Test
+    void imagemagickComposeNormalizesPayloadToLocalFileUris() throws Exception {
+        Path root = Files.createTempDirectory("imagemagick-contract");
+        Path inputDir = Files.createDirectories(root.resolve("exports"));
+        Path outputDir = Files.createDirectories(root.resolve("exports/detail-compositions"));
+        Path input = createPng(inputDir.resolve("input.png"));
+        Path output = outputDir.resolve("final.png");
+
+        AtomicReference<String> receivedBody = new AtomicReference<>();
+        startServer(exchange -> {
+            receivedBody.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            send(exchange, 200, "{\"resultPath\":\"" + output.toString().replace("\\", "\\\\")
+                    + "\",\"fileSize\":123,\"width\":12,\"height\":18}");
+        });
+
+        MockEnvironment environment = new MockEnvironment()
+                .withProperty("tools.adapters.imagemagick.enabled", "true")
+                .withProperty("tools.adapters.imagemagick.base-url", baseUrl())
+                .withProperty("tools.adapters.imagemagick.allowed-input-roots", inputDir.toString())
+                .withProperty("tools.adapters.imagemagick.allowed-output-roots", outputDir.toString());
+        ToolAdapterServiceImpl service = new ToolAdapterServiceImpl(environment, new ObjectMapper());
+
+        ToolInvokeRequestDTO request = new ToolInvokeRequestDTO();
+        request.setOperation("compose");
+        request.setPayload(Map.of(
+                "inputImages", List.of(input.toString()),
+                "outputRatio", "750xauto",
+                "outputPath", output.toString()));
+
+        ToolInvokeResponseDTO response = service.invoke("imagemagick", request);
+
+        assertTrue(receivedBody.get().contains(input.toUri().toString()));
+        assertTrue(receivedBody.get().contains(output.toString().replace("\\", "\\\\")));
+        assertEquals(200, response.getStatusCode());
+        assertTrue(response.getBody() instanceof Map);
+    }
+
+    private Path createPng(Path path) throws IOException {
+        Files.createDirectories(path.getParent());
+        java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(12, 18, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+        javax.imageio.ImageIO.write(image, "png", path.toFile());
+        return path;
     }
 
     private void startServer(ExchangeHandler handler) throws IOException {

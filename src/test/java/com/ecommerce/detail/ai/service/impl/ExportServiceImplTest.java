@@ -47,6 +47,7 @@ class ExportServiceImplTest {
         detail.setPrice(new BigDecimal("199.00"));
         detail.setDescription("real description");
         detail.setAiGeneratedContent("real ai content");
+        detail.setAuditStatus(2);
 
         ProductDetailMapper productDetailMapper = proxy(ProductDetailMapper.class, invocation -> {
             if ("selectById".equals(invocation.method().getName())) {
