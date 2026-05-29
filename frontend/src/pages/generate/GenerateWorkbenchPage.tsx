@@ -407,10 +407,14 @@ export default function GenerateWorkbenchPage() {
 
       <Card className="p0-card" title="任务列表">
         {jobsQuery.isError ? (
-          <ErrorState
-            title="任务列表加载失败"
-            description={jobsQuery.error instanceof Error ? jobsQuery.error.message : "无法读取 image-job 列表"}
-            onRetry={() => void jobsQuery.refetch()}
+          <EmptyState
+            title="暂无生图任务"
+            description="后端未连接或暂无数据"
+            action={
+              <Button onClick={() => void jobsQuery.refetch()}>
+                重试
+              </Button>
+            }
           />
         ) : jobsQuery.isPending ? (
           <LoadingState title="正在加载任务列表" description="GET /api/v1/image-jobs/list" />
