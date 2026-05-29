@@ -1,30 +1,26 @@
-import { FileSearchOutlined, MenuOutlined } from "@ant-design/icons";
-import { Button, Space, Tag, Typography } from "antd";
-import { AiPendingNotice } from "../components/common";
+import { Button, Space } from "antd";
+import { PlusOutlined, SearchOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
-const { Text, Title } = Typography;
+export const TopBar = () => {
+  const navigate = useNavigate();
 
-type TopBarProps = {
-  onOpenNav?: () => void;
-  showMenuButton?: boolean;
-};
-
-export const TopBar = ({ onOpenNav, showMenuButton = false }: TopBarProps) => (
-  <header className="workbench-header glass-surface">
-    <Space className="workbench-brand" size={12}>
-      {showMenuButton && (
-        <Button aria-label="打开导航" icon={<MenuOutlined />} onClick={onOpenNav} type="text" />
-      )}
-      <FileSearchOutlined className="workbench-brand-icon" />
-      <div className="workbench-brand-copy">
-        <Title level={4}>电商商品视觉 AI 生产台</Title>
-        <Text type="secondary">市场调研到详情页交付的企业级工作台</Text>
+  return (
+    <header className="df-topbar">
+      <div className="df-topbar-brand">
+        <div className="df-topbar-brand-icon">D</div>
+        <span>DetailFlow</span>
       </div>
-    </Space>
-    <Space size={8} wrap className="workbench-header-status">
-      <Tag color="processing">后端接口 /api/v1</Tag>
-      <Tag color="warning">工具默认待配置</Tag>
-      <AiPendingNotice compact />
-    </Space>
-  </header>
-);
+      <div className="df-topbar-actions">
+        <Button type="text" icon={<SearchOutlined />} size="small">
+          Search
+        </Button>
+        <Button type="primary" icon={<PlusOutlined />} size="small" onClick={() => navigate("/materials/new")}>
+          New Project
+        </Button>
+        <Button type="text" icon={<SettingOutlined />} size="small" onClick={() => navigate("/system/diagnostics")} />
+        <Button type="text" icon={<UserOutlined />} size="small" />
+      </div>
+    </header>
+  );
+};

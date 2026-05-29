@@ -12,13 +12,13 @@ const App = () => (
     locale={zhCN}
     theme={{
       token: {
-        colorPrimary: "#1890ff",
-        colorSuccess: "#52c41a",
-        colorWarning: "#faad14",
-        colorError: "#f5222d",
-        colorTextBase: "#1f2937",
+        colorPrimary: "#c0392b",
+        colorSuccess: "#27ae60",
+        colorWarning: "#d4a017",
+        colorError: "#c0392b",
+        colorTextBase: "#2c2318",
         borderRadius: 8,
-        fontFamily: "Source Han Sans SC, Noto Sans SC, system-ui, sans-serif"
+        fontFamily: "Noto Sans SC, Source Han Sans SC, system-ui, sans-serif"
       },
       components: {
         Layout: {
@@ -30,7 +30,12 @@ const App = () => (
           borderRadiusLG: 8
         },
         Table: {
-          headerBg: "rgba(248, 250, 252, 0.82)"
+          headerBg: "#f8f5f0",
+          rowHoverBg: "rgba(192, 57, 43, 0.03)"
+        },
+        Menu: {
+          itemBg: "transparent",
+          subMenuItemBg: "transparent"
         }
       }
     }}

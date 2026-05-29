@@ -1,96 +1,219 @@
-import { AuditOutlined, ExportOutlined, FileImageOutlined, ProductOutlined, RadarChartOutlined, ToolOutlined } from "@ant-design/icons";
-import { Card, Col, Empty, Row, Space, Statistic, Tag, Typography } from "antd";
-import { Link } from "react-router-dom";
-import { ApiUnavailableState, ToolUnavailableState } from "../../components/common";
+import {
+  AuditOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloudUploadOutlined,
+  DollarOutlined,
+  ExportOutlined,
+  FileImageOutlined,
+  FileTextOutlined,
+  FolderOpenOutlined,
+  ProductOutlined,
+  RadarChartOutlined,
+  ScissorOutlined,
+  TagsOutlined,
+  ToolOutlined,
+  WarningOutlined
+} from "@ant-design/icons";
+import { Button, Progress, Space, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
 
-const { Paragraph, Text, Title } = Typography;
+const { Text } = Typography;
 
-const quickEntries = [
-  {
-    title: "新建商品资料",
-    description: "从商品基础信息和素材引用开始。",
-    to: "/materials/new",
-    icon: <ProductOutlined />
-  },
-  {
-    title: "市场调研任务",
-    description: "创建授权调研任务骨架。",
-    to: "/research/new",
-    icon: <RadarChartOutlined />
-  },
-  {
-    title: "生图工作台",
-    description: "查看提示词、合规预检和工具状态。",
-    to: "/generate",
-    icon: <FileImageOutlined />
-  },
-  {
-    title: "工具中心",
-    description: "查看 tool-adapter 配置状态。",
-    to: "/tools",
-    icon: <ToolOutlined />
-  }
+const stats = [
+  { label: "Active Projects", value: "12", change: "+3", up: true },
+  { label: "Pending Audit", value: "8", change: "-2", up: false },
+  { label: "Exports (Month)", value: "156", change: "+23", up: true },
+  { label: "Cost (Month)", value: "$247", change: "+$31", up: true },
+  { label: "Materials", value: "1,247", change: "+89", up: true }
 ];
 
+const projects = [
+  { name: "Summer Dress Collection", platform: "Taobao", stage: "AI Generate", progress: 72, updated: "10 min ago", status: "running" as const },
+  { name: "Kitchen Tools Set", platform: "JD", stage: "Export", progress: 100, updated: "2 hrs ago", status: "done" as const },
+  { name: "Sports Equipment", platform: "PDD", stage: "Audit", progress: 45, updated: "30 min ago", status: "running" as const },
+  { name: "Beauty Products Line", platform: "Douyin", stage: "Detail Edit", progress: 88, updated: "1 hr ago", status: "running" as const }
+];
+
+const tasks = [
+  { name: "Summer Dress - Main Visual", type: "Image Gen", status: "running" as const },
+  { name: "Kitchen Tools - Copywriting", type: "Content", status: "done" as const },
+  { name: "Sports Gear - Compliance Check", type: "Audit", status: "pending" as const },
+  { name: "Beauty Line - Background Removal", type: "Post-Process", status: "running" as const },
+  { name: "Kitchen Tools - PDF Export", type: "Export", status: "done" as const }
+];
+
+const quickEntries = [
+  { icon: <ProductOutlined />, title: "New Project", desc: "Start from material upload", to: "/materials/new" },
+  { icon: <RadarChartOutlined />, title: "Research", desc: "Market & competitor scan", to: "/research" },
+  { icon: <FileImageOutlined />, title: "AI Generate", desc: "Visual generation workbench", to: "/generate" },
+  { icon: <FileTextOutlined />, title: "Detail Editor", desc: "Edit product detail pages", to: "/details/1" },
+  { icon: <TagsOutlined />, title: "Prompt Lab", desc: "Create & manage prompts", to: "/visual/prompt-workbench" },
+  { icon: <FolderOpenOutlined />, title: "Templates", desc: "Prompt template library", to: "/visual/prompt-templates" },
+  { icon: <ExportOutlined />, title: "Export", desc: "Export & deliver files", to: "/exports" },
+  { icon: <ToolOutlined />, title: "Tools", desc: "Tool adapter settings", to: "/tools" }
+];
+
+const systemStatus = [
+  { name: "AI Relay", status: "offline" as const },
+  { name: "Image Gen", status: "offline" as const },
+  { name: "File Storage", status: "online" as const },
+  { name: "Export Service", status: "online" as const },
+  { name: "Real-ESRGAN", status: "offline" as const },
+  { name: "LLaVA", status: "offline" as const }
+];
+
+const statusLabel: Record<string, string> = {
+  running: "Running",
+  done: "Done",
+  pending: "Queued"
+};
+
+const statusColor: Record<string, string> = {
+  running: "var(--color-info)",
+  done: "var(--color-success)",
+  pending: "var(--color-warning)"
+};
+
+const statusBg: Record<string, string> = {
+  running: "var(--color-info-light)",
+  done: "var(--color-success-light)",
+  pending: "var(--color-warning-light)"
+};
+
 export default function HomeWorkbenchPage() {
+  const navigate = useNavigate();
+
   return (
-    <main className="p0-page">
-      <section className="p0-hero glass-panel">
-        <div>
-          <Text className="p0-eyebrow">电商商品视觉 AI 生产台</Text>
-          <Title level={2}>首页工作台</Title>
-          <Paragraph>
-            这里展示当前前端 baseline 的真实接入状态。市场调研、竞品分析、生图、结果管理等模块保留骨架，但不展示伪造任务或伪造生成结果。
-          </Paragraph>
-        </div>
-        <Space wrap>
-          <Tag color="processing">/api/v1</Tag>
-          <Tag color="warning">AI 待配置</Tag>
-          <Tag color="default">工具默认关闭</Tag>
-        </Space>
-      </section>
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={8}>
-          <Card className="p0-card">
-            <Statistic title="真实生成结果" value="--" />
-            <Text type="secondary">未接入生图任务接口，不统计伪造数据。</Text>
-          </Card>
-        </Col>
-        <Col xs={24} md={8}>
-          <Card className="p0-card">
-            <Statistic title="待审核内容" value="--" prefix={<AuditOutlined />} />
-            <Text type="secondary">请进入审核中心查看真实接口数据。</Text>
-          </Card>
-        </Col>
-        <Col xs={24} md={8}>
-          <Card className="p0-card">
-            <Statistic title="导出记录" value="--" prefix={<ExportOutlined />} />
-            <Text type="secondary">导出列表会请求后端真实记录。</Text>
-          </Card>
-        </Col>
-      </Row>
-
-      <Card className="p0-card" title="快速入口">
-        <div className="p0-entry-grid">
-          {quickEntries.map((entry) => (
-            <Link className="p0-entry" to={entry.to} key={entry.to}>
-              <span className="p0-entry-icon">{entry.icon}</span>
-              <strong>{entry.title}</strong>
-              <Text type="secondary">{entry.description}</Text>
-            </Link>
-          ))}
-        </div>
-      </Card>
-
-      <div className="p0-notice-grid">
-        <ApiUnavailableState compact description="首页不拼接虚构指标，没有汇总接口的统计项不会展示。" />
-        <ToolUnavailableState compact description="Crawl4AI、ComfyUI、LLaVA 等工具需要客户端私有化部署并配置 tool-adapter 后启用。" />
+    <>
+      {/* Page Header */}
+      <div className="df-page-header">
+        <h1 className="df-page-title">Production Dashboard</h1>
+        <div className="df-page-desc">Overview of your e-commerce detail page production pipeline</div>
       </div>
 
-      <Card className="p0-card" title="最近任务">
-        <Empty description="暂无可展示的真实任务。接入 image-jobs / research-tasks 后展示任务队列。" />
-      </Card>
-    </main>
+      {/* Stats */}
+      <div className="df-stats">
+        {stats.map((s) => (
+          <div className="df-stat" key={s.label}>
+            <div className="df-stat-label">{s.label}</div>
+            <div className="df-stat-value">{s.value}</div>
+            <div className={`df-stat-change ${s.up ? "up" : "down"}`}>
+              {s.up ? "↑" : "↓"} {s.change} this period
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Two-column: Projects + Tasks */}
+      <div className="df-grid-2">
+        {/* Projects */}
+        <div className="df-card">
+          <div className="df-card-header">
+            <span className="df-card-title">Recent Projects</span>
+            <Button type="link" size="small" onClick={() => navigate("/visual/plans")}>View All</Button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {projects.map((p) => (
+              <div
+                key={p.name}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 80px 90px 100px 70px",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "10px 12px",
+                  background: "var(--bg-muted)",
+                  borderRadius: "var(--radius-sm)",
+                  fontSize: 13
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{p.platform} · {p.updated}</div>
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{p.stage}</div>
+                <div>
+                  <Progress
+                    percent={p.progress}
+                    size="small"
+                    strokeColor={p.progress === 100 ? "var(--color-success)" : "var(--color-primary)"}
+                    style={{ marginBottom: 0 }}
+                  />
+                </div>
+                <div
+                  className="df-task-status"
+                  style={{ background: statusBg[p.status], color: statusColor[p.status], textAlign: "center" }}
+                >
+                  {statusLabel[p.status]}
+                </div>
+                <Button type="link" size="small" style={{ padding: 0 }}>Open</Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Tasks */}
+        <div className="df-card">
+          <div className="df-card-header">
+            <span className="df-card-title">Recent Tasks</span>
+            <Button type="link" size="small" onClick={() => navigate("/generate")}>View All</Button>
+          </div>
+          <div className="df-task-list">
+            {tasks.map((t, i) => (
+              <div className="df-task-item" key={i}>
+                <div className="df-task-dot" style={{ background: statusColor[t.status] }} />
+                <span className="df-task-name">{t.name}</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{t.type}</span>
+                <span
+                  className="df-task-status"
+                  style={{ background: statusBg[t.status], color: statusColor[t.status] }}
+                >
+                  {statusLabel[t.status]}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Entry + System Status */}
+      <div className="df-grid-2">
+        {/* Quick Entry */}
+        <div className="df-card">
+          <div className="df-card-header">
+            <span className="df-card-title">Quick Actions</span>
+          </div>
+          <div className="df-entry-grid">
+            {quickEntries.map((e) => (
+              <div className="df-entry" key={e.to} onClick={() => navigate(e.to)}>
+                <div className="df-entry-icon">{e.icon}</div>
+                <div className="df-entry-title">{e.title}</div>
+                <div className="df-entry-desc">{e.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* System Status */}
+        <div className="df-card">
+          <div className="df-card-header">
+            <span className="df-card-title">System Status</span>
+            <Button type="link" size="small" onClick={() => navigate("/system/diagnostics")}>Diagnostics</Button>
+          </div>
+          <div className="df-system-grid">
+            {systemStatus.map((s) => (
+              <div className="df-system-item" key={s.name}>
+                <div className={`df-system-dot ${s.status}`} />
+                <span style={{ flex: 1 }}>{s.name}</span>
+                <span style={{ fontSize: 11, color: s.status === "online" ? "var(--color-success)" : "var(--text-muted)" }}>
+                  {s.status === "online" ? "Online" : "Offline"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

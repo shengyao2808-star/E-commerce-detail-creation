@@ -1,53 +1,131 @@
+/* ============================================================
+   DetailFlow v6.0 - Minimal Zen Design Token System
+   ============================================================ */
+
 :root {
   color-scheme: light;
-  --color-primary: #1890ff;
-  --color-success: #52c41a;
-  --color-warning: #faad14;
-  --color-error: #f5222d;
-  --color-ai-muted: #8c8c8c;
-  --color-risk-extreme: #722ed1;
-  --text-strong: #172033;
-  --text-default: #334155;
-  --text-muted: #64748b;
-  --border-subtle: rgba(148, 163, 184, 0.28);
-  --surface-strong: rgba(255, 255, 255, 0.9);
-  --surface-soft: rgba(255, 255, 255, 0.64);
-  --shadow-soft: 0 18px 46px rgba(15, 23, 42, 0.09);
-  font-family: "Source Han Sans SC", "Noto Sans SC", system-ui, sans-serif;
+
+  /* --- Color Tokens --- */
+  --color-primary: #c0392b;
+  --color-primary-light: rgba(192, 57, 43, 0.08);
+  --color-primary-border: rgba(192, 57, 43, 0.2);
+  --color-success: #27ae60;
+  --color-success-light: rgba(39, 174, 96, 0.08);
+  --color-warning: #d4a017;
+  --color-warning-light: rgba(212, 160, 23, 0.08);
+  --color-error: #c0392b;
+  --color-error-light: rgba(192, 57, 43, 0.08);
+  --color-info: #5b7fa5;
+  --color-info-light: rgba(91, 127, 165, 0.08);
+
+  /* --- Surface & Background --- */
+  --bg-page: #f5f0eb;
+  --bg-card: #fefcfa;
+  --bg-sidebar: #fefcfa;
+  --bg-topbar: #fefcfa;
+  --bg-hover: rgba(192, 57, 43, 0.04);
+  --bg-active: rgba(192, 57, 43, 0.06);
+  --bg-muted: #f8f5f0;
+
+  /* --- Text --- */
+  --text-primary: #2c2318;
+  --text-secondary: #6b5e50;
+  --text-muted: #a09484;
+  --text-inverse: #fefcfa;
+
+  /* --- Border --- */
+  --border-default: #e8dfd5;
+  --border-light: #f0ece4;
+  --border-active: var(--color-primary);
+
+  /* --- Shadows (restrained) --- */
+  --shadow-sm: 0 1px 2px rgba(44, 35, 24, 0.04);
+  --shadow-md: 0 2px 8px rgba(44, 35, 24, 0.06);
+  --shadow-lg: 0 4px 16px rgba(44, 35, 24, 0.08);
+
+  /* --- Typography --- */
+  --font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, sans-serif;
+  --font-size-page-title: 22px;
+  --font-size-section-title: 15px;
+  --font-size-body: 13px;
+  --font-size-caption: 12px;
+  --font-size-label: 11px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* --- Spacing --- */
+  --space-page: 24px;
+  --space-card: 20px;
+  --space-section: 20px;
+  --space-item: 12px;
+  --space-form: 12px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* --- Border Radius --- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 20px;
+
+  /* --- Layout --- */
+  --sidebar-width: 220px;
+  --sidebar-collapsed: 60px;
+  --topbar-height: 52px;
+  --assistant-width: 320px;
+
+  font-family: var(--font-family);
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
+html, body, #root {
   min-height: 100%;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  color: var(--text-default);
-  background:
-    linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(237, 243, 247, 0.9)),
-    linear-gradient(45deg, rgba(24, 144, 255, 0.08), rgba(82, 196, 26, 0.06));
-  font-family: "Source Han Sans SC", "Noto Sans SC", system-ui, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-page);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   color: var(--color-primary);
+  text-decoration: none;
 }
 
+/* --- Ant Design Override --- */
 .ant-typography {
   letter-spacing: 0;
 }
 
-.ant-btn,
-.ant-tag,
-.ant-input,
-.ant-select-selector,
-.ant-table-wrapper {
+.ant-btn, .ant-tag, .ant-input, .ant-select-selector, .ant-table-wrapper {
   letter-spacing: 0;
+}
+
+.ant-card {
+  border-radius: var(--radius-md) !important;
+}
+
+.ant-table {
+  font-size: var(--font-size-body) !important;
+}
+
+.ant-table-thead > tr > th {
+  font-size: var(--font-size-label) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted) !important;
+  font-weight: var(--font-weight-semibold) !important;
 }

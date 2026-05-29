@@ -1,4 +1,32 @@
-﻿## 2026-05-29 06:18:27 +08:00 | Prompt Template Library | Branch master | HEAD fb66e16
+﻿## 2026-05-29 10:17:01 +08:00 | v6.0 Phase 0+1 Complete | Branch master | HEAD 6722f24
+- Action: Completed Phase 0 baseline audit and Phase 1 hardening (encoding + security + config).
+- Phase 0 completed:
+  - Generated docs/v6/PHASE_0_BASELINE_REPORT.md, FILE_MAP.md, RISK_LIST.md
+  - Confirmed all TSX/Java files are valid UTF-8 (mojibake was PowerShell display artifact)
+  - Confirmed schema.sql had real double-encoding in 52 COMMENT lines
+  - Confirmed MaterialListPage/MaterialDetailPage used 898 Unicode escapes
+  - Confirmed zero security/auth infrastructure existed
+- Phase 1.1 completed:
+  - schema.sql: Fixed 194 lines of double-encoded Chinese in table COMMENT fields
+  - MaterialListPage.tsx: Replaced 457 Unicode escapes with actual Chinese
+  - MaterialDetailPage.tsx: Replaced 441 Unicode escapes with actual Chinese
+- Phase 1.3 completed:
+  - application.yml: DB credentials now use env vars (DB_USERNAME, DB_PASSWORD, DB_URL)
+  - Created application-dev.yml for local development
+  - Created .env.example template
+  - Added .env to .gitignore
+- Phase 1.2 completed:
+  - Added Spring Security + JWT (spring-boot-starter-security, jjwt 0.12.6)
+  - SecurityConfig: stateless JWT, CORS, public /auth/* endpoints
+  - JwtUtil + JwtAuthFilter: token generation/validation/extraction
+  - AuthController: POST /auth/login, POST /auth/register
+  - UserAccount entity + mapper + user_account DB table
+  - Frontend: auth.ts (token management), LoginPage.tsx (dark theme), 401 auto-redirect
+  - Fixed broken XML comment in pom.xml
+- Exact next step: Phase 2 (extract utils, remove P0Scaffold, fix hardcoded routes)
+- Blockers: None.
+- Verification: mvn test 152 pass, npm test (tsc) clean, npm run build pass.
+## 2026-05-29 06:18:27 +08:00 | Prompt Template Library | Branch master | HEAD fb66e16
 - Action: Implemented full prompt template library feature (backend + frontend + tests).
 - Completed:
   - **DB**: Added prompt_template table with 17 columns (category, platform, style, scene_type, source, usage_count, rating, etc.)
@@ -878,6 +906,7 @@ Notes:
   - `& "C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2025.2.6.2\plugins\maven\lib\maven3\bin\mvn.cmd" test`: passed (`Tests run: 86, Failures: 0, Errors: 0, Skipped: 0`).
   - `cd frontend; npm test`: passed.
   - `cd frontend; npm run build`: passed with the existing Vite chunk-size warning only.
+
 
 
 
