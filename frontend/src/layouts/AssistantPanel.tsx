@@ -1,48 +1,40 @@
 import { useNavigate } from "react-router-dom";
+import { useLang } from "../i18n";
 
 export const AssistantPanel = () => {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   return (
     <aside className="df-assistant">
       <div className="df-assistant-header">
         <div className="df-assistant-pulse" />
-        PromptPilot
+        {t("assistant.title")}
       </div>
 
-      <div className="df-assistant-section">Insights</div>
-      <div className="df-assistant-msg insight">
-        3 products missing SEO keywords. Auto-generate from category analysis available.
-      </div>
-      <div className="df-assistant-msg">
-        Real-ESRGAN batch upscale completed: 12 images, average quality score 94.2.
-      </div>
+      <div className="df-assistant-section">{t("assistant.insights")}</div>
+      <div className="df-assistant-msg insight">{t("assistant.insight1")}</div>
+      <div className="df-assistant-msg">{t("assistant.insight2")}</div>
 
-      <div className="df-assistant-section">Suggested Prompts</div>
-      <div className="df-assistant-msg">
-        "Elegant summer dress on sunlit terrace, natural light, lifestyle photography, warm tones, 4K detail shot"
-      </div>
+      <div className="df-assistant-section">{t("assistant.prompts")}</div>
+      <div className="df-assistant-msg">{t("assistant.prompt1")}</div>
 
-      <div className="df-assistant-section">Recent Activity</div>
-      <div className="df-assistant-msg" style={{ fontSize: 12 }}>
-        Kitchen Tools detail pages exported (5 files, Word format)
-      </div>
-      <div className="df-assistant-msg" style={{ fontSize: 12 }}>
-        Audit #247 approved with quality score 96
-      </div>
+      <div className="df-assistant-section">{t("assistant.activity")}</div>
+      <div className="df-assistant-msg" style={{ fontSize: 12 }}>{t("assistant.activity1")}</div>
+      <div className="df-assistant-msg" style={{ fontSize: 12 }}>{t("assistant.activity2")}</div>
 
-      <div className="df-assistant-section">Quick Actions</div>
+      <div className="df-assistant-section">{t("assistant.actions")}</div>
       <div className="df-assistant-action" onClick={() => navigate("/visual/prompt-workbench")}>
-        Generate Prompt
+        {t("assistant.act.prompt")}
       </div>
       <div className="df-assistant-action" onClick={() => navigate("/post-process")}>
-        Batch Upscale
+        {t("assistant.act.upscale")}
       </div>
       <div className="df-assistant-action" onClick={() => navigate("/exports")}>
-        Export PDF
+        {t("assistant.act.pdf")}
       </div>
       <div className="df-assistant-action" onClick={() => navigate("/research")}>
-        Competitor Scan
+        {t("assistant.act.scan")}
       </div>
     </aside>
   );

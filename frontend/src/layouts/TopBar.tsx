@@ -1,9 +1,11 @@
 import { Button, Space } from "antd";
-import { PlusOutlined, SearchOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
+import { GlobalOutlined, PlusOutlined, SearchOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useLang } from "../i18n";
 
 export const TopBar = () => {
   const navigate = useNavigate();
+  const { lang, toggle, t } = useLang();
 
   return (
     <header className="df-topbar">
@@ -13,13 +15,22 @@ export const TopBar = () => {
       </div>
       <div className="df-topbar-actions">
         <Button type="text" icon={<SearchOutlined />} size="small">
-          Search
+          {t("topbar.search")}
         </Button>
         <Button type="primary" icon={<PlusOutlined />} size="small" onClick={() => navigate("/materials/new")}>
-          New Project
+          {t("topbar.newProject")}
         </Button>
         <Button type="text" icon={<SettingOutlined />} size="small" onClick={() => navigate("/system/diagnostics")} />
         <Button type="text" icon={<UserOutlined />} size="small" />
+        <Button
+          type="text"
+          icon={<GlobalOutlined />}
+          size="small"
+          onClick={toggle}
+          title={lang === "zh" ? "Switch to English" : "切换到中文"}
+        >
+          {lang === "zh" ? "EN" : "中"}
+        </Button>
       </div>
     </header>
   );
