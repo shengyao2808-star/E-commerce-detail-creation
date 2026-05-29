@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style 01 - Glassmorphism Dark (Linear/Raycast)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--surface:rgba(255,255,255,0.04);--glass:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.08);--text:#e4e4e7;--muted:#71717a;--accent:#6366f1;--accent2:#8b5cf6;--green:#22c55e;--orange:#f59e0b;--red:#ef4444;--radius:12px;--font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:grid;grid-template-columns:220px 1fr 300px;grid-template-rows:56px 1fr;overflow:hidden}
+body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,0.15),transparent 70%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-300px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%);pointer-events:none;z-index:0}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--glass);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:10}
+.topbar .logo{font-weight:700;font-size:18px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.topbar .search{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:var(--muted);font-size:13px;width:280px;display:flex;align-items:center;gap:8px}
+.topbar .user{display:flex;align-items:center;gap:10px}
+.topbar .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.sidebar{background:var(--glass);backdrop-filter:blur(20px);border-right:1px solid var(--border);padding:16px 12px;z-index:5;display:flex;flex-direction:column;gap:2px}
+.nav-group{margin-bottom:16px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:4px 12px;margin-bottom:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:rgba(99,102,241,0.12);color:var(--accent)}
+.nav-icon{width:18px;text-align:center;font-size:14px}
+.main{padding:24px;overflow-y:auto;z-index:2}
+.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .2s}
+.stat-card:hover{border-color:rgba(99,102,241,0.3);transform:translateY(-2px)}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:700;letter-spacing:-1px}
+.stat-change{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.stat-change.up{color:var(--green)}
+.stat-change.down{color:var(--red)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.card{background:var(--glass);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600}
+.badge{font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(99,102,241,0.15);color:var(--accent)}
+.progress-bar{height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border-radius:8px;font-size:13px}
+.task-dot{width:8px;height:8px;border-radius:50%}
+.task-name{flex:1}
+.task-status{font-size:11px;padding:2px 8px;border-radius:4px;font-family:var(--mono)}
+.status-running{background:rgba(99,102,241,0.15);color:var(--accent)}
+.status-done{background:rgba(34,197,94,0.15);color:var(--green)}
+.status-pending{background:rgba(245,158,11,0.15);color:var(--orange)}
+.chart-placeholder{height:200px;background:linear-gradient(180deg,rgba(99,102,241,0.08) 0%,transparent 100%);border-radius:8px;position:relative;overflow:hidden}
+.chart-line{position:absolute;bottom:0;left:0;right:0;height:120px;background:linear-gradient(to right,transparent,rgba(99,102,241,0.2),transparent)}
+.right-panel{background:var(--glass);backdrop-filter:blur(20px);border-left:1px solid var(--border);padding:20px;z-index:5;overflow-y:auto}
+.ai-header{display:flex;align-items:center;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-msg{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;font-size:13px;line-height:1.6}
+.ai-msg.system{border-left:2px solid var(--accent)}
+.quick-action{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;font-size:12px;cursor:pointer;transition:all .15s}
+.quick-action:hover{border-color:var(--accent);background:rgba(99,102,241,0.06)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">DetailFlow</div>
+  <div class="search">&#128269; Search materials, tasks, templates...</div>
+  <div class="user"><span style="font-size:13px;color:var(--muted)">Admin</span><div class="avatar">A</div></div>
+</div>
+<div class="sidebar">
+  <div class="nav-group">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item active"><span class="nav-icon">&#9673;</span> Dashboard</div>
+    <div class="nav-item"><span class="nav-icon">&#128200;</span> Market Research</div>
+    <div class="nav-item"><span class="nav-icon">&#128230;</span> Materials</div>
+    <div class="nav-item"><span class="nav-icon">&#127912;</span> AI Generate</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Production</div>
+    <div class="nav-item"><span class="nav-icon">&#128196;</span> Detail Editor</div>
+    <div class="nav-item"><span class="nav-icon">&#9989;</span> Audit</div>
+    <div class="nav-item"><span class="nav-icon">&#128230;</span> Exports</div>
+    <div class="nav-item"><span class="nav-icon">&#9988;</span> Post-Process</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Visual</div>
+    <div class="nav-item"><span class="nav-icon">&#127912;</span> Prompt Lab</div>
+    <div class="nav-item"><span class="nav-icon">&#128444;</span> Templates</div>
+    <div class="nav-item"><span class="nav-icon">&#128209;</span> Visual Plans</div>
+  </div>
+  <div class="nav-group" style="margin-top:auto">
+    <div class="nav-item"><span class="nav-icon">&#9881;</span> System</div>
+  </div>
+</div>
+<div class="main">
+  <div class="section-title">Production Overview</div>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">Total Products</div><div class="stat-value">1,247</div><div class="stat-change up">&#9650; 12% this week</div></div>
+    <div class="stat-card"><div class="stat-label">AI Generated</div><div class="stat-value">892</div><div class="stat-change up">&#9650; 23% this week</div></div>
+    <div class="stat-card"><div class="stat-label">Pending Audit</div><div class="stat-value">38</div><div class="stat-change down">&#9660; 5 from yesterday</div></div>
+    <div class="stat-card"><div class="stat-label">Published</div><div class="stat-value">756</div><div class="stat-change up">&#9650; 8 today</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Generation Pipeline</span><span class="badge">Live</span></div>
+      <div class="task-list">
+        <div class="task-item"><div class="task-dot" style="background:var(--accent)"></div><span class="task-name">Summer Dress Collection - Main Shots</span><span class="task-status status-running">Running</span></div>
+        <div class="task-item"><div class="task-dot" style="background:var(--green)"></div><span class="task-name">Kitchen Tools - Detail Pages</span><span class="task-status status-done">Done</span></div>
+        <div class="task-item"><div class="task-dot" style="background:var(--orange)"></div><span class="task-name">Sports Equipment - Scene Images</span><span class="task-status status-pending">Queued</span></div>
+        <div class="task-item"><div class="task-dot" style="background:var(--green)"></div><span class="task-name">Beauty Products - Lifestyle Shots</span><span class="task-status status-done">Done</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Cost Trend (7d)</span></div>
+      <div class="chart-placeholder"><div class="chart-line"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Quality Score Distribution</span></div>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Excellent (90+)</span><span style="color:var(--green)">68%</span></div><div class="progress-bar"><div class="progress-fill" style="width:68%;background:var(--green)"></div></div></div>
+      <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Good (70-89)</span><span style="color:var(--accent)">24%</span></div><div class="progress-bar"><div class="progress-fill" style="width:24%;background:var(--accent)"></div></div></div>
+      <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Needs Work (&lt;70)</span><span style="color:var(--orange)">8%</span></div><div class="progress-bar"><div class="progress-fill" style="width:8%;background:var(--orange)"></div></div></div>
+    </div>
+  </div>
+</div>
+<div class="right-panel">
+  <div class="ai-header"><div class="ai-dot"></div><span style="font-size:14px;font-weight:600">AI Assistant</span></div>
+  <div class="ai-msg system">Detected 3 products with incomplete SEO keywords. I can auto-generate based on category analysis.</div>
+  <div class="ai-msg">Suggested prompt for "Summer Dress": "Elegant summer dress on a sunlit terrace, natural light, lifestyle photography style, warm tones, 4K detail shot"</div>
+  <div class="ai-msg">Real-ESRGAN upscale completed for batch #247. 12 images processed, average quality score: 94.2</div>
+  <div style="margin-top:20px;margin-bottom:12px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Quick Actions</div>
+  <div class="quick-action">&#127912; Generate new prompt</div>
+  <div class="quick-action">&#128260; Batch upscale images</div>
+  <div class="quick-action">&#128196; Export to PDF</div>
+  <div class="quick-action">&#128200; Run competitor scan</div>
+  <div class="quick-action">&#9989; Submit for audit</div>
+</div>
+</body>
+</html>
