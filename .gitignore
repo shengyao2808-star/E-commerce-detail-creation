@@ -44,3 +44,5 @@ logs/
 exports/
 null
 package-lock.json
+.env
+.env.local

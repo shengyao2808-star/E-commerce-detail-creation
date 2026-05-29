@@ -1,0 +1,13 @@
+# Development profile - local only
+# Override with environment variables for production
+
+spring:
+  datasource:
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ecommerce_detail_ai?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai}
+
+logging:
+  level:
+    root: INFO
+    com.ecommerce.detail.ai: DEBUG
