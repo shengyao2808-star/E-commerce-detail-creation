@@ -31,100 +31,100 @@ interface ProductMaterial {
   updateTime?: string;
 }
 
-const AI_PENDING_TEXT = '\u5f85\u63a5\u5165\u672c\u5730AI\u670d\u52a1';
+const AI_PENDING_TEXT = '待接入本地AI服务';
 
 const TEXT = {
-  detailEyebrow: '\u5546\u54c1\u8d44\u6599\u8be6\u60c5',
-  detailTitle: '\u5546\u54c1\u8d44\u6599\u8be6\u60c5',
+  detailEyebrow: '商品资料详情',
+  detailTitle: '商品资料详情',
   subtitle:
-    '\u5c55\u793a\u57fa\u7840\u8d44\u6599\u3001\u56fe\u7247\u3001\u89c6\u9891\u3001\u6587\u6863\u5217\u8868\uff0c\u5e76\u660e\u786e\u6807\u8bb0\u7f16\u8f91\u3001\u5220\u9664\u548c AI \u529f\u80fd\u7684\u5f85\u63a5\u5165\u72b6\u6001\u3002',
-  backToList: '\u8fd4\u56de\u5217\u8868',
-  aiGenerate: 'AI \u751f\u6210\u8be6\u60c5\u9875',
-  realApi: '\u771f\u5b9e\u63a5\u53e3',
+    '展示基础资料、图片、视频、文档列表，并明确标记编辑、删除和 AI 功能的待接入状态。',
+  backToList: '返回列表',
+  aiGenerate: 'AI 生成详情页',
+  realApi: '真实接口',
   apiDesc:
-    '\u672c\u9875\u8bfb\u53d6\u5546\u54c1\u8d44\u6599\u8be6\u60c5\uff0c\u5220\u9664\u53ef\u4ee5\u76f4\u63a5\u8c03\u7528\u540e\u7aef\uff1b\u7f16\u8f91\u5165\u53e3\u5728\u5217\u8868\u9875\u5b8c\u6210\u3002',
-  available: '\u53ef\u7528',
-  loadingTitle: '\u6b63\u5728\u52a0\u8f7d\u5546\u54c1\u8d44\u6599',
-  loadFailed: '\u52a0\u8f7d\u5931\u8d25',
-  cannotLoad: '\u65e0\u6cd5\u83b7\u53d6\u5546\u54c1\u8d44\u6599',
-  baseInfo: '\u57fa\u7840\u8d44\u6599',
-  productInfo: '\u5546\u54c1\u4fe1\u606f',
-  productName: '\u5546\u54c1\u540d\u79f0',
-  brand: '\u54c1\u724c',
-  category: '\u7c7b\u76ee',
+    '本页读取商品资料详情，删除可以直接调用后端；编辑入口在列表页完成。',
+  available: '可用',
+  loadingTitle: '正在加载商品资料',
+  loadFailed: '加载失败',
+  cannotLoad: '无法获取商品资料',
+  baseInfo: '基础资料',
+  productInfo: '商品信息',
+  productName: '商品名称',
+  brand: '品牌',
+  category: '类目',
   sku: 'SKU',
-  price: '\u4ef7\u683c',
-  uploader: '\u4e0a\u4f20\u4eba',
-  uploadTime: '\u4e0a\u4f20\u65f6\u95f4',
-  createTime: '\u521b\u5efa\u65f6\u95f4',
-  updateTime: '\u66f4\u65b0\u65f6\u95f4',
-  fileType: '\u6587\u4ef6\u7c7b\u578b',
-  fileSize: '\u6587\u4ef6\u5927\u5c0f',
-  parseStatus: '\u89e3\u6790\u72b6\u6001',
-  description: '\u5546\u54c1\u63cf\u8ff0',
-  noDescription: '\u6682\u65e0\u63cf\u8ff0',
-  parseError: '\u89e3\u6790\u9519\u8bef',
-  editMaterial: '\u7f16\u8f91\u8d44\u6599',
-  deleteMaterial: '\u5220\u9664\u8d44\u6599',
-  originalFile: '\u67e5\u770b\u539f\u59cb\u6587\u4ef6',
-  assetFile: '\u8d44\u6599\u6587\u4ef6',
-  images: '\u5546\u54c1\u56fe\u7247',
-  videos: '\u5546\u54c1\u89c6\u9891',
-  documents: '\u5546\u54c1\u6587\u6863',
-  fileCountSuffix: '\u4e2a\u6587\u4ef6',
-  noImages: '\u6682\u65e0\u5546\u54c1\u56fe\u7247',
-  noVideos: '\u6682\u65e0\u5546\u54c1\u89c6\u9891',
-  noDocuments: '\u6682\u65e0\u5546\u54c1\u6587\u6863',
-  uploadHint: '\u53ef\u901a\u8fc7 POST /api/v1/material/upload \u4e0a\u4f20\u8d44\u6599\u540e\u5c55\u793a\u3002',
-  videoUnsupported: '\u5f53\u524d\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u89c6\u9891\u9884\u89c8\u3002',
-  open: '\u6253\u5f00',
-  aiCapability: 'AI \u80fd\u529b',
+  price: '价格',
+  uploader: '上传人',
+  uploadTime: '上传时间',
+  createTime: '创建时间',
+  updateTime: '更新时间',
+  fileType: '文件类型',
+  fileSize: '文件大小',
+  parseStatus: '解析状态',
+  description: '商品描述',
+  noDescription: '暂无描述',
+  parseError: '解析错误',
+  editMaterial: '编辑资料',
+  deleteMaterial: '删除资料',
+  originalFile: '查看原始文件',
+  assetFile: '资料文件',
+  images: '商品图片',
+  videos: '商品视频',
+  documents: '商品文档',
+  fileCountSuffix: '个文件',
+  noImages: '暂无商品图片',
+  noVideos: '暂无商品视频',
+  noDocuments: '暂无商品文档',
+  uploadHint: '可通过 POST /api/v1/material/upload 上传资料后展示。',
+  videoUnsupported: '当前浏览器不支持视频预览。',
+  open: '打开',
+  aiCapability: 'AI 能力',
   aiPanelDesc:
-    'AI \u89e3\u6790\u8d44\u6599\u3001\u56fe\u7247 OCR\u3001\u6587\u6863\u7406\u89e3\u3001\u751f\u6210\u8be6\u60c5\u9875\u5185\u5bb9\u5747\u4fdd\u7559\u5165\u53e3\uff0c\u4f46\u4e0d\u8c03\u7528\u672a\u5b8c\u6210\u670d\u52a1\u3002',
-  aiPrompt: '\u67e5\u770b AI \u63a5\u5165\u63d0\u793a',
-  aiFeature: 'AI \u529f\u80fd',
-  aiDisconnected: 'AI \u670d\u52a1\u672a\u8fde\u63a5',
-  currentStatus: '\u5f53\u524d\u72b6\u6001',
+    'AI 解析资料、图片 OCR、文档理解、生成详情页内容均保留入口，但不调用未完成服务。',
+  aiPrompt: '查看 AI 接入提示',
+  aiFeature: 'AI 功能',
+  aiDisconnected: 'AI 服务未连接',
+  currentStatus: '当前状态',
   aiRecommend:
-    '\u63a8\u8350\u65b9\u6848\uff1aOllama + Qwen2.5\uff0c\u672c\u5730\u90e8\u7f72\u5b8c\u6210\u540e\u518d\u542f\u7528 AI \u89e3\u6790\u3001\u751f\u6210\u8be6\u60c5\u9875\u548c\u6587\u6863\u7406\u89e3\u80fd\u529b\u3002',
-  later: '\u7a0d\u540e\u63a5\u5165',
-  close: '\u5173\u95ed',
-  missingId: '\u7f3a\u5c11\u5546\u54c1\u8d44\u6599 ID\uff0c\u65e0\u6cd5\u8c03\u7528 GET /api/v1/material/{id}\u3002',
-  loadFailedMessage: '\u5546\u54c1\u8d44\u6599\u8be6\u60c5\u52a0\u8f7d\u5931\u8d25\u3002',
-  deleteConfirm: '\u786e\u5b9a\u5220\u9664\u8be5\u5546\u54c1\u8d44\u6599\uff1f',
-  deleting: '\u5220\u9664\u4e2d...',
-  deleteSuccess: '\u8d44\u6599\u5df2\u5220\u9664\uff0c\u6b63\u5728\u8fd4\u56de\u5217\u8868\u3002',
+    '推荐方案：Ollama + Qwen2.5，本地部署完成后再启用 AI 解析、生成详情页和文档理解能力。',
+  later: '稍后接入',
+  close: '关闭',
+  missingId: '缺少商品资料 ID，无法调用 GET /api/v1/material/{id}。',
+  loadFailedMessage: '商品资料详情加载失败。',
+  deleteConfirm: '确定删除该商品资料？',
+  deleting: '删除中...',
+  deleteSuccess: '资料已删除，正在返回列表。',
 };
 
 function getStatusMeta(status?: MaterialStatus) {
   switch (String(status ?? '')) {
     case '0':
-      return { label: '\u8349\u7a3f', className: 'neutral' };
+      return { label: '草稿', className: 'neutral' };
     case '1':
-      return { label: '\u5df2\u63d0\u4ea4', className: 'info' };
+      return { label: '已提交', className: 'info' };
     case '2':
-      return { label: '\u5ba1\u6838\u4e2d', className: 'warning' };
+      return { label: '审核中', className: 'warning' };
     case '3':
-      return { label: '\u5ba1\u6838\u901a\u8fc7', className: 'success' };
+      return { label: '审核通过', className: 'success' };
     case '4':
-      return { label: '\u5ba1\u6838\u62d2\u7edd', className: 'danger' };
+      return { label: '审核拒绝', className: 'danger' };
     default:
-      return { label: '\u6682\u65e0\u72b6\u6001', className: 'neutral' };
+      return { label: '暂无状态', className: 'neutral' };
   }
 }
 
 function getParseStatusLabel(status?: number) {
   switch (status) {
     case 0:
-      return '\u5f85\u89e3\u6790';
+      return '待解析';
     case 1:
-      return '\u89e3\u6790\u4e2d';
+      return '解析中';
     case 2:
-      return '\u89e3\u6790\u6210\u529f';
+      return '解析成功';
     case 3:
-      return '\u89e3\u6790\u5931\u8d25';
+      return '解析失败';
     default:
-      return '\u6682\u65e0\u89e3\u6790\u72b6\u6001';
+      return '暂无解析状态';
   }
 }
 

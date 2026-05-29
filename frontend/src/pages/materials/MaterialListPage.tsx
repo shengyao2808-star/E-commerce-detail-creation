@@ -18,87 +18,87 @@ interface UploadForm {
   documents: string;
 }
 
-const AI_PENDING_TEXT = '\u5f85\u63a5\u5165\u672c\u5730AI\u670d\u52a1';
-const EMPTY_LIST_NOTICE = '\u5f53\u524d\u7b5b\u9009\u6761\u4ef6\u4e0b\u6682\u65e0\u5546\u54c1\u8d44\u6599\u3002';
+const AI_PENDING_TEXT = '待接入本地AI服务';
+const EMPTY_LIST_NOTICE = '当前筛选条件下暂无商品资料。';
 
 const TEXT = {
-  module: '\u5546\u54c1\u8d44\u6599\u6a21\u5757',
-  title: '\u5546\u54c1\u8d44\u6599\u7ba1\u7406',
+  module: '商品资料模块',
+  title: '商品资料管理',
   subtitle:
-    '\u4e0a\u4f20\u5546\u54c1\u57fa\u7840\u8d44\u6599\uff0c\u67e5\u770b\u5df2\u521b\u5efa\u8d44\u6599\uff0c\u5e76\u901a\u8fc7\u540e\u7aef\u63a5\u53e3\u5b8c\u6210\u67e5\u8be2\u3001\u7f16\u8f91\u548c\u5220\u9664\u3002',
-  aiParse: 'AI \u89e3\u6790\u8d44\u6599',
-  uploadProduct: '+ \u4e0a\u4f20\u5546\u54c1',
-  collapseUpload: '\u6536\u8d77\u4e0a\u4f20',
-  apiStatus: '\u63a5\u53e3\u72b6\u6001',
-  listApiMissing: '\u8d44\u6599 CRUD \u63a5\u53e3',
+    '上传商品基础资料，查看已创建资料，并通过后端接口完成查询、编辑和删除。',
+  aiParse: 'AI 解析资料',
+  uploadProduct: '+ 上传商品',
+  collapseUpload: '收起上传',
+  apiStatus: '接口状态',
+  listApiMissing: '资料 CRUD 接口',
   listApiDesc:
-    '\u5217\u8868\u3001\u7f16\u8f91\u548c\u5220\u9664\u5747\u5df2\u63a5\u5165\u540e\u7aef\u771f\u5b9e\u63a5\u53e3\uff1b\u54c1\u724c\u3001\u7c7b\u76ee\u548c\u72b6\u6001\u7b5b\u9009\u5728\u5f53\u524d\u9875\u9762\u672c\u5730\u4e8c\u6b21\u8fc7\u6ee4\u3002',
-  available: '\u53ef\u7528',
-  filterArea: '\u7b5b\u9009\u533a',
-  materialSearch: '\u8d44\u6599\u68c0\u7d22',
+    '列表、编辑和删除均已接入后端真实接口；品牌、类目和状态筛选在当前页面本地二次过滤。',
+  available: '可用',
+  filterArea: '筛选区',
+  materialSearch: '资料检索',
   filterPending: 'GET /api/v1/material/list',
-  keyword: '\u5173\u952e\u8bcd',
-  keywordPlaceholder: '\u5546\u54c1\u540d\u79f0 / SKU',
-  brand: '\u54c1\u724c',
-  brandPlaceholder: '\u54c1\u724c\u540d\u79f0',
-  category: '\u7c7b\u76ee',
-  categoryPlaceholder: '\u5546\u54c1\u7c7b\u76ee',
-  status: '\u72b6\u6001',
-  all: '\u5168\u90e8',
-  query: '\u67e5\u8be2',
-  reset: '\u91cd\u7f6e',
-  realApi: '\u771f\u5b9e\u63a5\u53e3',
-  uploadMaterial: '\u4e0a\u4f20\u5546\u54c1\u8d44\u6599',
-  editMaterial: '\u7f16\u8f91\u5546\u54c1\u8d44\u6599',
-  productName: '\u5546\u54c1\u540d\u79f0',
-  productNameRequired: '\u5546\u54c1\u540d\u79f0 *',
-  productNamePlaceholder: '\u8bf7\u8f93\u5165\u5546\u54c1\u540d\u79f0',
+  keyword: '关键词',
+  keywordPlaceholder: '商品名称 / SKU',
+  brand: '品牌',
+  brandPlaceholder: '品牌名称',
+  category: '类目',
+  categoryPlaceholder: '商品类目',
+  status: '状态',
+  all: '全部',
+  query: '查询',
+  reset: '重置',
+  realApi: '真实接口',
+  uploadMaterial: '上传商品资料',
+  editMaterial: '编辑商品资料',
+  productName: '商品名称',
+  productNameRequired: '商品名称 *',
+  productNamePlaceholder: '请输入商品名称',
   sku: 'SKU',
-  skuPlaceholder: '\u5546\u54c1 SKU',
-  uploader: '\u4e0a\u4f20\u4eba',
-  uploaderPlaceholder: '\u64cd\u4f5c\u4eba',
-  price: '\u4ef7\u683c',
-  description: '\u5546\u54c1\u63cf\u8ff0',
-  descriptionPlaceholder: '\u8f93\u5165\u5546\u54c1\u5356\u70b9\u3001\u89c4\u683c\u6216\u539f\u59cb\u63cf\u8ff0',
-  imageUrl: '\u56fe\u7247 URL',
-  imageUrlPlaceholder: '\u6bcf\u884c\u4e00\u4e2a\u56fe\u7247 URL',
-  videoUrl: '\u89c6\u9891 URL',
-  videoUrlPlaceholder: '\u6bcf\u884c\u4e00\u4e2a\u89c6\u9891 URL',
-  documentUrl: '\u6587\u6863 URL',
-  documentUrlPlaceholder: '\u6bcf\u884c\u4e00\u4e2a\u6587\u6863 URL',
-  chooseFiles: '\u9009\u62e9\u672c\u5730\u6587\u4ef6',
+  skuPlaceholder: '商品 SKU',
+  uploader: '上传人',
+  uploaderPlaceholder: '操作人',
+  price: '价格',
+  description: '商品描述',
+  descriptionPlaceholder: '输入商品卖点、规格或原始描述',
+  imageUrl: '图片 URL',
+  imageUrlPlaceholder: '每行一个图片 URL',
+  videoUrl: '视频 URL',
+  videoUrlPlaceholder: '每行一个视频 URL',
+  documentUrl: '文档 URL',
+  documentUrlPlaceholder: '每行一个文档 URL',
+  chooseFiles: '选择本地文件',
   binaryPending:
-    '\u5f53\u524d\u4e0a\u4f20\u63a5\u53e3\u63a5\u6536 JSON \u8d44\u6599\uff1b\u6587\u4ef6\u4e8c\u8fdb\u5236\u4e0a\u4f20\u5f85\u516c\u5171 API \u5c42\u786e\u8ba4\u3002',
-  submitMaterial: '\u63d0\u4ea4\u8d44\u6599',
-  saveMaterial: '\u4fdd\u5b58\u8d44\u6599',
-  uploading: '\u4e0a\u4f20\u4e2d...',
-  saving: '\u4fdd\u5b58\u4e2d...',
-  loading: '\u52a0\u8f7d\u4e2d...',
-  listArea: '\u5217\u8868\u533a',
-  materialList: '\u5546\u54c1\u8d44\u6599\u5217\u8868',
-  visibleCountPrefix: '\u5171',
-  visibleCountSuffix: '\u6761\u53ef\u5c55\u793a\u8d44\u6599',
-  operation: '\u64cd\u4f5c',
-  view: '\u67e5\u770b',
-  edit: '\u7f16\u8f91',
-  delete: '\u5220\u9664',
-  noDescription: '\u6682\u65e0\u63cf\u8ff0',
-  noListData: '\u6682\u65e0\u5217\u8868\u6570\u636e',
-  viewDetail: '\u67e5\u770b\u8be6\u60c5',
-  uploadTime: '\u4e0a\u4f20\u65f6\u95f4',
-  prevPage: '\u4e0a\u4e00\u9875',
-  nextPage: '\u4e0b\u4e00\u9875',
-  fillProductName: '\u8bf7\u5148\u586b\u5199\u5546\u54c1\u540d\u79f0\u3002',
-  uploadFailed: '\u4e0a\u4f20\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5\u3002',
-  uploadSuccess: '\u4e0a\u4f20\u6210\u529f\uff0c\u8d44\u6599 ID',
-  updateSuccess: '\u8d44\u6599\u5df2\u66f4\u65b0\u3002',
-  deleteSuccess: '\u8d44\u6599\u5df2\u5220\u9664\u3002',
-  loadFailed: '\u5217\u8868\u52a0\u8f7d\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5\u3002',
-  updateFailed: '\u66f4\u65b0\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5\u3002',
-  deleteFailed: '\u5220\u9664\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5\u3002',
-  confirmDelete: '\u786e\u5b9a\u5220\u9664\u8be5\u5546\u54c1\u8d44\u6599\uff1f',
-  cancelEdit: '\u53d6\u6d88\u7f16\u8f91',
-  unfilledBrand: '\u672a\u586b\u5199\u54c1\u724c',
+    '当前上传接口接收 JSON 资料；文件二进制上传待公共 API 层确认。',
+  submitMaterial: '提交资料',
+  saveMaterial: '保存资料',
+  uploading: '上传中...',
+  saving: '保存中...',
+  loading: '加载中...',
+  listArea: '列表区',
+  materialList: '商品资料列表',
+  visibleCountPrefix: '共',
+  visibleCountSuffix: '条可展示资料',
+  operation: '操作',
+  view: '查看',
+  edit: '编辑',
+  delete: '删除',
+  noDescription: '暂无描述',
+  noListData: '暂无列表数据',
+  viewDetail: '查看详情',
+  uploadTime: '上传时间',
+  prevPage: '上一页',
+  nextPage: '下一页',
+  fillProductName: '请先填写商品名称。',
+  uploadFailed: '上传失败，请稍后重试。',
+  uploadSuccess: '上传成功，资料 ID',
+  updateSuccess: '资料已更新。',
+  deleteSuccess: '资料已删除。',
+  loadFailed: '列表加载失败，请稍后重试。',
+  updateFailed: '更新失败，请稍后重试。',
+  deleteFailed: '删除失败，请稍后重试。',
+  confirmDelete: '确定删除该商品资料？',
+  cancelEdit: '取消编辑',
+  unfilledBrand: '未填写品牌',
 };
 
 const emptyUploadForm: UploadForm = {
@@ -149,17 +149,17 @@ function normalizeUploadPayload(form: UploadForm) {
 function getStatusMeta(status?: MaterialStatus) {
   switch (String(status ?? '')) {
     case '0':
-      return { label: '\u8349\u7a3f', className: 'neutral' };
+      return { label: '草稿', className: 'neutral' };
     case '1':
-      return { label: '\u5df2\u63d0\u4ea4', className: 'info' };
+      return { label: '已提交', className: 'info' };
     case '2':
-      return { label: '\u5ba1\u6838\u4e2d', className: 'warning' };
+      return { label: '审核中', className: 'warning' };
     case '3':
-      return { label: '\u5ba1\u6838\u901a\u8fc7', className: 'success' };
+      return { label: '审核通过', className: 'success' };
     case '4':
-      return { label: '\u5ba1\u6838\u62d2\u7edd', className: 'danger' };
+      return { label: '审核拒绝', className: 'danger' };
     default:
-      return { label: '\u6682\u65e0\u72b6\u6001', className: 'neutral' };
+      return { label: '暂无状态', className: 'neutral' };
   }
 }
 

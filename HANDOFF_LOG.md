@@ -688,3 +688,9 @@ pm test pipeline.
 - Updated routes, navigation (System group)
 - Upgraded version to 5.0.0
 - Maven: 145 tests passed; Frontend: passed
+
+## 2026-05-29 06:18:31 +08:00 | Prompt Template Library
+- Implemented full prompt template library: entity, mapper, service, controller, DTOs, tests
+- Frontend PromptTemplatePage with card grid, filters, detail drawer, create/edit modal
+- 7 unit tests passing, TypeScript compiles clean
+- Commit: fb66e16

@@ -1,4 +1,26 @@
-﻿## 2026-05-28 05:33:29 +08:00 | v5.0.0 release | Branch master | HEAD 1e8ffc4
+﻿## 2026-05-29 06:18:27 +08:00 | Prompt Template Library | Branch master | HEAD fb66e16
+- Action: Implemented full prompt template library feature (backend + frontend + tests).
+- Completed:
+  - **DB**: Added prompt_template table with 17 columns (category, platform, style, scene_type, source, usage_count, rating, etc.)
+  - **Backend**: PromptTemplate entity + Mapper + DTO + CreateDTO + PromptTemplateService + PromptTemplateServiceImpl + PromptTemplateController
+  - **APIs**: GET /prompt-templates/list (paginated, multi-filter, keyword search), GET /{id}, POST (create), PUT /{id} (update), DELETE /{id}, POST /{id}/duplicate, POST /{id}/use (increment usage)
+  - **Tests**: PromptTemplateServiceImplTest with 7 unit tests (create, list, getById, duplicate, incrementUsage, delete, update)
+  - **Frontend**: PromptTemplatePage with card grid layout, category/platform/style/source filters, keyword search, detail drawer, create/edit modal, duplicate/delete actions
+  - **Route/Nav**: Registered /visual/prompt-templates route and "Prompt Templates" navigation entry under Visual group
+  - **Fix**: PostProcessTaskServiceImplTest encoding issue (non-UTF-8 comment chars)
+- Exact next step:
+  - Seed built-in SYSTEM templates from GitHub prompt repos (img-prompt, art-prompt-system, SD templates)
+  - Integrate market research tools (Amazon/1688 scraper) into ResearchTaskServiceImpl
+  - Consider adding AI-powered prompt suggestion (auto-generate templates based on category/platform)
+- Blockers: None.
+- Files touched:
+  - Backend: PromptTemplate.java, PromptTemplateMapper.java, PromptTemplateDTO.java, PromptTemplateCreateDTO.java, PromptTemplateService.java, PromptTemplateServiceImpl.java, PromptTemplateController.java, PromptTemplateServiceImplTest.java, PostProcessTaskServiceImplTest.java (fix), schema.sql
+  - Frontend: types.ts, api.ts, PromptTemplatePage.tsx, routes/index.tsx, navigation.tsx
+  - Config: HANDOFF.md, HANDOFF_LOG.md
+- Verification:
+  - mvn test: passed (152 tests)
+  - npm test (tsc): passed
+## 2026-05-28 05:33:29 +08:00 | v5.0.0 release | Branch master | HEAD 1e8ffc4
 - Action: Completed v5.0.0 milestone with full system management, cost tracking, diagnostics, and team/permission foundation.
 - Completed (P3.12 - P5):
   - **P3.12**: Created PostProcessPollingCoordinator for async post-process task status polling via tool adapters.
@@ -856,6 +878,7 @@ Notes:
   - `& "C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2025.2.6.2\plugins\maven\lib\maven3\bin\mvn.cmd" test`: passed (`Tests run: 86, Failures: 0, Errors: 0, Skipped: 0`).
   - `cd frontend; npm test`: passed.
   - `cd frontend; npm run build`: passed with the existing Vite chunk-size warning only.
+
 
 
 
