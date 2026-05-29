@@ -30,6 +30,7 @@ const ModelProfilesPage = lazy(() => import("../pages/visual/ModelProfilesPage")
 const PromptWorkbenchPage = lazy(() => import("../pages/visual/PromptWorkbenchPage"));
 const PromptTemplatePage = lazy(() => import("../pages/visual/PromptTemplatePage"));
 const VisualPlansPage = lazy(() => import("../pages/visual/VisualPlansPage"));
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
 const CostManagementPage = lazy(() => import("../pages/cost/CostManagementPage"));
 const DiagnosticsPage = lazy(() => import("../pages/system/DiagnosticsPage"));
 const TeamManagementPage = lazy(() => import("../pages/system/TeamManagementPage"));
@@ -44,6 +45,7 @@ const routes: RouteObject[] = [
     path: "/",
     element: <WorkbenchLayout />,
     children: [
+      { path: "login", element: lazyRouteElement(<LoginPage />) },
       { index: true, element: <HomeWorkbenchPage /> },
       { path: "research", element: lazyRouteElement(<ResearchCenterPage />) },
       { path: "research/new", element: lazyRouteElement(<NewResearchTaskPage />) },

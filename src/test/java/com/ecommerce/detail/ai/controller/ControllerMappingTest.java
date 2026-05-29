@@ -28,7 +28,8 @@ class ControllerMappingTest {
                 loadController("com.ecommerce.detail.ai.controller.SkcPolicyController"),
                 loadController("com.ecommerce.detail.ai.controller.PromptWorkbenchController"),
                 loadController("com.ecommerce.detail.ai.controller.VisualPlanController"),
-                loadController("com.ecommerce.detail.ai.controller.ProductContentTaskController")
+                loadController("com.ecommerce.detail.ai.controller.ProductContentTaskController"),
+                loadController("com.ecommerce.detail.ai.controller.AuthController")
         );
 
         for (Class<?> controller : controllers) {

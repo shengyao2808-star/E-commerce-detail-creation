@@ -630,3 +630,18 @@ CREATE TABLE IF NOT EXISTS prompt_template (
     INDEX idx_prompt_template_source (source),
     INDEX idx_prompt_template_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='提示词模板库';
+
+CREATE TABLE IF NOT EXISTS user_account (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    display_name VARCHAR(100),
+    email VARCHAR(200),
+    role VARCHAR(20) NOT NULL DEFAULT 'USER',
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    deleted TINYINT DEFAULT 0,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_account_username (username),
+    INDEX idx_user_account_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

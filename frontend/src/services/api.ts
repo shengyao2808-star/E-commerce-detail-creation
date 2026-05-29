@@ -1,4 +1,5 @@
-﻿import type {
+import { getToken, clearAuth } from "./auth";
+import type {
   ApiResult,
   ApplyGenerationResultsRequest,
   AssetOcrTask,
@@ -165,6 +166,11 @@ const request = async <T>(
   });
 
   const payload = (await response.json().catch(() => null)) as ApiResult<T> | null;
+  if (response.status === 401) {
+    clearAuth();
+    window.location.href = "/login";
+    throw new Error("Session expired");
+  }
   if (!response.ok || !payload || payload.code < 200 || payload.code >= 300) {
     throw new ApiRequestError(payload?.message ?? `Request failed: ${API_BASE}${path}`, path, response.status);
   }
