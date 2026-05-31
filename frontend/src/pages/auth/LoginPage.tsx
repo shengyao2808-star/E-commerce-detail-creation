@@ -2,6 +2,7 @@ import { Button, Card, Form, Input, message, Space, Typography } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setToken, setUser } from "../../services/auth";
+import fullLogo from "../../assets/full-logo.png";
 
 const { Text, Title } = Typography;
 
@@ -29,13 +30,13 @@ export default function LoginPage() {
           displayName: data.data.displayName ?? data.data.username,
           role: data.data.role ?? "USER"
         });
-        message.success(isRegister ? "Registered" : "Logged in");
-        navigate("/");
+        message.success(isRegister ? "注册成功" : "登录成功");
+        navigate("/dashboard");
       } else {
-        message.error(data.message ?? "Login failed");
+        message.error(data.message ?? "登录失败");
       }
     } catch (err) {
-      message.error(err instanceof Error ? err.message : "Network error");
+      message.error(err instanceof Error ? err.message : "网络错误");
     } finally {
       setLoading(false);
     }
@@ -47,32 +48,39 @@ export default function LoginPage() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "linear-gradient(135deg, #0a0e1a 0%, #111827 100%)"
+      background: "var(--df-bg)"
     }}>
-      <Card style={{ width: 400, background: "#1a1f35", border: "1px solid rgba(99,115,146,0.2)" }}>
+      <Card style={{
+        width: 400,
+        background: "var(--df-surface)",
+        border: "1px solid var(--df-border)",
+        borderRadius: "var(--df-radius-xl)",
+        boxShadow: "var(--df-shadow-lg)"
+      }}>
         <Space direction="vertical" size={24} style={{ width: "100%" }}>
           <div style={{ textAlign: "center" }}>
-            <Title level={3} style={{ color: "#e8ecf4", marginBottom: 4 }}>DetailFlow</Title>
-            <Text style={{ color: "#8b95a8" }}>
-              {isRegister ? "Create an account" : "Sign in to continue"}
+            <img src={fullLogo} alt="DetailFlow" style={{ width: 80, height: 80, margin: "0 auto 16px", display: "block", borderRadius: 16 }} />
+            <Title level={3} style={{ color: "var(--df-text)", marginBottom: 4 }}>DetailFlow</Title>
+            <Text style={{ color: "var(--df-text-muted)" }}>
+              {isRegister ? "创建账号" : "登录以继续"}
             </Text>
           </div>
           <Form layout="vertical" onFinish={(v) => void onFinish(v)}>
-            <Form.Item name="username" rules={[{ required: true, message: "Username" }]}>
-              <Input placeholder="Username" size="large" />
+            <Form.Item name="username" rules={[{ required: true, message: "请输入用户名" }]}>
+              <Input placeholder="用户名" size="large" />
             </Form.Item>
-            <Form.Item name="password" rules={[{ required: true, message: "Password" }]}>
-              <Input.Password placeholder="Password" size="large" />
+            <Form.Item name="password" rules={[{ required: true, message: "请输入密码" }]}>
+              <Input.Password placeholder="密码" size="large" />
             </Form.Item>
             <Form.Item style={{ marginBottom: 8 }}>
               <Button type="primary" htmlType="submit" loading={loading} block size="large">
-                {isRegister ? "Register" : "Sign In"}
+                {isRegister ? "注册" : "登录"}
               </Button>
             </Form.Item>
           </Form>
           <div style={{ textAlign: "center" }}>
-            <Button type="link" onClick={() => setIsRegister(!isRegister)} style={{ color: "#3b82f6" }}>
-              {isRegister ? "Already have an account? Sign in" : "No account? Register"}
+            <Button type="link" onClick={() => setIsRegister(!isRegister)} style={{ color: "var(--df-primary)" }}>
+              {isRegister ? "已有账号？去登录" : "没有账号？去注册"}
             </Button>
           </div>
         </Space>

@@ -1,173 +1,239 @@
 import {
-  AuditOutlined, ExportOutlined, FileImageOutlined, FileTextOutlined,
-  FolderOpenOutlined, ProductOutlined, RadarChartOutlined,
-  TagsOutlined, ToolOutlined
+  AppstoreOutlined, AuditOutlined, DollarOutlined, ExportOutlined,
+  FileImageOutlined, FileTextOutlined, FolderOpenOutlined, PlusOutlined,
+  ProductOutlined, TagsOutlined, ToolOutlined, TeamOutlined,
+  CheckCircleOutlined, ClockCircleOutlined, ArrowUpOutlined, ArrowDownOutlined,
+  RightOutlined, ReloadOutlined, BellOutlined, SearchOutlined,
+  ShopOutlined, BarChartOutlined, CloudUploadOutlined, RocketOutlined
 } from "@ant-design/icons";
-import { Button, Progress } from "antd";
+import { Button, Input, Badge, Avatar, Tooltip } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../../i18n";
 
-const statusColor: Record<string, string> = {
-  running: "var(--color-info)",
-  done: "var(--color-success)",
-  pending: "var(--color-warning)"
-};
+const metrics = [
+  { labelKey: "stat.activeProjects", value: "18", trend: "+3", up: true, icon: <AppstoreOutlined />, color: "blue" },
+  { labelKey: "stat.pendingAudit", value: "32", trend: "+5", up: true, icon: <AuditOutlined />, color: "orange" },
+  { labelKey: "stat.exports", value: "128", trend: "+23", up: true, icon: <ExportOutlined />, color: "green" },
+  { labelKey: "stat.cost", value: "¥2.45M", trend: "-0.3M", up: false, icon: <DollarOutlined />, color: "purple" }
+];
 
-const statusBg: Record<string, string> = {
-  running: "var(--color-info-light)",
-  done: "var(--color-success-light)",
-  pending: "var(--color-warning-light)"
-};
+const projects = [
+  { name: "夏季女装详情", platform: "淘宝", progress: 65, status: "生成中", time: "2025-05-16 10:24", color: "blue" },
+  { name: "北欧风沙发详情页", platform: "京东", progress: 40, status: "生成中", time: "2025-05-16 09:15", color: "blue" },
+  { name: "清爽控油洗发水详情页", platform: "拼多多", progress: 20, status: "生成中", time: "2025-05-15 18:30", color: "blue" },
+  { name: "运动耳机详情页", platform: "抖音", progress: 100, status: "已完成", time: "2025-05-15 14:20", color: "green" }
+];
+
+const recentTasks = [
+  { name: "主视觉生成", project: "夏季女装", status: "进行中", icon: <FileImageOutlined />, color: "blue" },
+  { name: "详情页文案生成", project: "北欧沙发", status: "进行中", icon: <FileTextOutlined />, color: "blue" },
+  { name: "合规性检查", project: "洗发水", status: "待处理", icon: <AuditOutlined />, color: "orange" },
+  { name: "素材抠图处理", project: "运动耳机", status: "已完成", icon: <FolderOpenOutlined />, color: "green" },
+  { name: "后处理任务", project: "高清放大", status: "已完成", icon: <ToolOutlined />, color: "green" }
+];
+
+const quickActions = [
+  { title: "商品资料上传", desc: "上传商品基础资料", icon: <ProductOutlined />, to: "/materials/new", color: "blue" },
+  { title: "提示词工作台", desc: "创建与管理提示词", icon: <TagsOutlined />, to: "/visual/prompt-workbench", color: "purple" },
+  { title: "视觉规划", desc: "管理视觉方案", icon: <FileImageOutlined />, to: "/visual/plans", color: "green" },
+  { title: "导出管理", desc: "导出与交付文件", icon: <ExportOutlined />, to: "/exports", color: "orange" }
+];
+
+const systemStatus = [
+  { name: "AI Relay 服务", status: "正常", online: true },
+  { name: "图像生成服务", status: "正常", online: true },
+  { name: "文件存储服务", status: "正常", online: true },
+  { name: "导出服务", status: "正常", online: true },
+  { name: "LLaVA 服务", status: "正常", online: true }
+];
 
 export default function HomeWorkbenchPage() {
   const navigate = useNavigate();
   const { t } = useLang();
 
-  const stats = [
-    { label: t("stat.activeProjects"), value: "12", change: "+3", up: true },
-    { label: t("stat.pendingAudit"), value: "8", change: "-2", up: false },
-    { label: t("stat.exports"), value: "156", change: "+23", up: true },
-    { label: t("stat.cost"), value: "$247", change: "+$31", up: true },
-    { label: t("stat.materials"), value: "1,247", change: "+89", up: true }
-  ];
-
-  const projects = [
-    { name: "Summer Dress Collection", platform: "Taobao", stage: t("status.running"), progress: 72, updated: "10 min ago", status: "running" as const },
-    { name: "Kitchen Tools Set", platform: "JD", stage: t("status.done"), progress: 100, updated: "2 hrs ago", status: "done" as const },
-    { name: "Sports Equipment", platform: "PDD", stage: t("status.running"), progress: 45, updated: "30 min ago", status: "running" as const },
-    { name: "Beauty Products Line", platform: "Douyin", stage: t("status.running"), progress: 88, updated: "1 hr ago", status: "running" as const }
-  ];
-
-  const tasks = [
-    { name: "Summer Dress - Main Visual", type: "Image Gen", status: "running" as const },
-    { name: "Kitchen Tools - Copywriting", type: "Content", status: "done" as const },
-    { name: "Sports Gear - Compliance Check", type: "Audit", status: "pending" as const },
-    { name: "Beauty Line - Background Removal", type: "Post-Process", status: "running" as const },
-    { name: "Kitchen Tools - PDF Export", type: "Export", status: "done" as const }
-  ];
-
-  const quickEntries = [
-    { icon: <ProductOutlined />, title: t("action.newProject"), desc: t("action.newProject.desc"), to: "/materials/new" },
-    { icon: <RadarChartOutlined />, title: t("action.research"), desc: t("action.research.desc"), to: "/research" },
-    { icon: <FileImageOutlined />, title: t("action.generate"), desc: t("action.generate.desc"), to: "/generate" },
-    { icon: <FileTextOutlined />, title: t("action.detail"), desc: t("action.detail.desc"), to: "/details/1" },
-    { icon: <TagsOutlined />, title: t("action.prompt"), desc: t("action.prompt.desc"), to: "/visual/prompt-workbench" },
-    { icon: <FolderOpenOutlined />, title: t("action.template"), desc: t("action.template.desc"), to: "/visual/prompt-templates" },
-    { icon: <ExportOutlined />, title: t("action.export"), desc: t("action.export.desc"), to: "/exports" },
-    { icon: <ToolOutlined />, title: t("action.tools"), desc: t("action.tools.desc"), to: "/tools" }
-  ];
-
-  const systemStatus = [
-    { name: "AI Relay", status: "offline" as const },
-    { name: "Image Gen", status: "offline" as const },
-    { name: "File Storage", status: "online" as const },
-    { name: "Export Service", status: "online" as const },
-    { name: "Real-ESRGAN", status: "offline" as const },
-    { name: "LLaVA", status: "offline" as const }
-  ];
-
   return (
-    <>
-      <div className="df-page-header">
-        <h1 className="df-page-title">{t("dashboard.title")}</h1>
-        <div className="df-page-desc">{t("dashboard.desc")}</div>
+    <div style={{ padding: "0 24px 24px" }}>
+      {/* Page title bar */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 24,
+        paddingTop: 16
+      }}>
+        <div>
+          <h1 style={{
+            fontSize: 24,
+            fontWeight: 700,
+            color: "var(--df-text)",
+            margin: 0,
+            lineHeight: 1.3
+          }}>
+            工作台
+          </h1>
+          <p style={{
+            fontSize: 14,
+            color: "var(--df-text-muted)",
+            margin: "4px 0 0"
+          }}>
+            欢迎回来，这是您的电商详情自动化工作台
+          </p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Input
+            placeholder="搜索..."
+            prefix={<SearchOutlined style={{ color: "var(--df-text-muted)" }} />}
+            style={{ width: 240 }}
+            allowClear
+          />
+          <Tooltip title="刷新">
+            <Button icon={<ReloadOutlined />} />
+          </Tooltip>
+          <Badge count={3} size="small">
+            <Button icon={<BellOutlined />} />
+          </Badge>
+        </div>
       </div>
 
-      <div className="df-stats">
-        {stats.map((s) => (
-          <div className="df-stat" key={s.label}>
-            <div className="df-stat-label">{s.label}</div>
-            <div className="df-stat-value">{s.value}</div>
-            <div className={`df-stat-change ${s.up ? "up" : "down"}`}>
-              {s.up ? "↑" : "↓"} {s.change}
+      {/* Metrics cards */}
+      <div className="df-grid-4" style={{ marginBottom: 24 }}>
+        {metrics.map((m) => (
+          <div key={m.labelKey} className="df-metric-card">
+            <div className={`df-metric-icon ${m.color}`}>{m.icon}</div>
+            <div className="df-metric-body">
+              <div className="df-metric-label">{t(m.labelKey)}</div>
+              <div className="df-metric-value">{m.value}</div>
+              <div className={`df-metric-trend ${m.up ? "up" : "down"}`}>
+                {m.up ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                {m.trend}
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="df-grid-2">
+      {/* Main content - left/right layout */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 360px",
+        gap: 24,
+        marginBottom: 24
+      }}>
+        {/* Left: Project progress */}
         <div className="df-card">
-          <div className="df-card-header">
-            <span className="df-card-title">{t("section.projects")}</span>
-            <Button type="link" size="small" onClick={() => navigate("/visual/plans")}>{t("section.viewAll")}</Button>
+          <div className="df-section-header">
+            <span className="df-section-title">{t("section.projects")}</span>
+            <span className="df-section-link" onClick={() => navigate("/materials")}>
+              {t("section.viewAll")} <RightOutlined style={{ fontSize: 10 }} />
+            </span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {projects.map((p) => (
-              <div
-                key={p.name}
-                style={{
-                  display: "grid", gridTemplateColumns: "1fr 70px 90px 80px 60px",
-                  alignItems: "center", gap: 8, padding: "10px 12px",
-                  background: "var(--bg-muted)", borderRadius: "var(--radius-sm)", fontSize: 13
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{p.platform} · {p.updated}</div>
+          <div>
+            {projects.map((p, i) => (
+              <div key={i} className="df-project-item">
+                <div className="df-project-thumb">
+                  <ShopOutlined style={{ color: "var(--df-primary)" }} />
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{p.stage}</div>
-                <Progress percent={p.progress} size="small" strokeColor={p.progress === 100 ? "var(--color-success)" : "var(--color-primary)"} />
-                <div className="df-task-status" style={{ background: statusBg[p.status], color: statusColor[p.status], textAlign: "center" }}>
-                  {t(`status.${p.status}`)}
+                <div className="df-project-info">
+                  <div className="df-project-name">{p.name}</div>
+                  <div className="df-project-meta">{p.platform} · {p.time}</div>
                 </div>
-                <Button type="link" size="small" style={{ padding: 0 }}>→</Button>
+                <div className="df-project-progress">
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, color: "var(--df-text-muted)" }}>{p.progress}%</span>
+                    <span className={`df-status ${p.color}`}>{p.status}</span>
+                  </div>
+                  <div className="df-progress-bar">
+                    <div className={`df-progress-fill ${p.color}`} style={{ width: `${p.progress}%` }} />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="df-card">
-          <div className="df-card-header">
-            <span className="df-card-title">{t("section.tasks")}</span>
-            <Button type="link" size="small" onClick={() => navigate("/generate")}>{t("section.viewAll")}</Button>
+        {/* Right: Quick actions + System status */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Quick actions */}
+          <div className="df-card">
+            <div className="df-section-header">
+              <span className="df-section-title">{t("section.actions")}</span>
+            </div>
+            <div className="df-grid-2">
+              {quickActions.map((action, i) => (
+                <div key={i} className="df-quick-action" onClick={() => navigate(action.to)}>
+                  <div className={`df-quick-action-icon df-metric-icon ${action.color}`}>{action.icon}</div>
+                  <div className="df-quick-action-text">
+                    <div className="df-quick-action-title">{action.title}</div>
+                    <div className="df-quick-action-desc">{action.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="df-task-list">
-            {tasks.map((task, i) => (
-              <div className="df-task-item" key={i}>
-                <div className="df-task-dot" style={{ background: statusColor[task.status] }} />
-                <span className="df-task-name">{task.name}</span>
-                <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{task.type}</span>
-                <span className="df-task-status" style={{ background: statusBg[task.status], color: statusColor[task.status] }}>
-                  {t(`status.${task.status}`)}
-                </span>
-              </div>
-            ))}
+
+          {/* System status */}
+          <div className="df-card">
+            <div className="df-section-header">
+              <span className="df-section-title">{t("section.system")}</span>
+            </div>
+            <div>
+              {systemStatus.map((s, i) => (
+                <div key={i} className="df-system-item">
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <span className={`df-system-dot ${s.online ? "green" : "red"}`} />
+                    <span style={{ fontSize: 13 }}>{s.name}</span>
+                  </div>
+                  <span className={`df-status ${s.online ? "green" : "red"}`}>{s.status}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="df-grid-2">
-        <div className="df-card">
-          <div className="df-card-header"><span className="df-card-title">{t("section.actions")}</span></div>
-          <div className="df-entry-grid">
-            {quickEntries.map((e) => (
-              <div className="df-entry" key={e.to} onClick={() => navigate(e.to)}>
-                <div className="df-entry-icon">{e.icon}</div>
-                <div className="df-entry-title">{e.title}</div>
-                <div className="df-entry-desc">{e.desc}</div>
-              </div>
-            ))}
-          </div>
+      {/* Bottom: Recent tasks */}
+      <div className="df-card">
+        <div className="df-section-header">
+          <span className="df-section-title">{t("section.tasks")}</span>
+          <Button type="primary" icon={<PlusOutlined />} size="small">
+            新建任务
+          </Button>
         </div>
-
-        <div className="df-card">
-          <div className="df-card-header">
-            <span className="df-card-title">{t("section.system")}</span>
-            <Button type="link" size="small" onClick={() => navigate("/system/diagnostics")}>{t("diag.goto")}</Button>
-          </div>
-          <div className="df-system-grid">
-            {systemStatus.map((s) => (
-              <div className="df-system-item" key={s.name}>
-                <div className={`df-system-dot ${s.status}`} />
-                <span style={{ flex: 1 }}>{s.name}</span>
-                <span style={{ fontSize: 11, color: s.status === "online" ? "var(--color-success)" : "var(--text-muted)" }}>
-                  {s.status === "online" ? "Online" : "Offline"}
-                </span>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+          {recentTasks.map((task, i) => (
+            <div key={i} className="df-task-item" style={{ padding: "12px 16px" }}>
+              <div className={`df-task-icon df-metric-icon ${task.color}`}>{task.icon}</div>
+              <div className="df-task-info">
+                <div className="df-task-name">{task.name}</div>
+                <div style={{ fontSize: 11, color: "var(--df-text-muted)" }}>{task.project}</div>
               </div>
-            ))}
-          </div>
+              <span className={`df-status ${task.color}`}>{task.status}</span>
+            </div>
+          ))}
         </div>
       </div>
-    </>
+
+      {/* Bottom CTA */}
+      <div style={{
+        marginTop: 24,
+        padding: "16px 24px",
+        borderRadius: 14,
+        background: "linear-gradient(135deg, rgba(91, 82, 224, 0.08), rgba(139, 92, 246, 0.06))",
+        border: "1px solid rgba(91, 82, 224, 0.15)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <RocketOutlined style={{ fontSize: 20, color: "var(--df-primary)" }} />
+          <span style={{ fontSize: 15, fontWeight: 600, color: "var(--df-text)" }}>
+            开始创建您的第一个电商详情页
+          </span>
+        </div>
+        <Button type="primary" onClick={() => navigate("/materials/new")}>
+          立即开始 <RightOutlined />
+        </Button>
+      </div>
+    </div>
   );
 }

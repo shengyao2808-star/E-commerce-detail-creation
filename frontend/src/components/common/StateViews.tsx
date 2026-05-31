@@ -21,7 +21,7 @@ type RetryStateProps = CommonStateProps & {
 };
 
 export const LoadingState = ({
-  title = "Loading",
+  title = "加载中",
   description,
   compact = false
 }: Partial<CommonStateProps>) => (
@@ -36,11 +36,11 @@ export const LoadingState = ({
 );
 
 export const ErrorState = ({
-  title,
+  title = "加载失败",
   description,
   action,
   onRetry,
-  retryText = "Retry",
+  retryText = "重试",
   compact = false
 }: RetryStateProps) => (
   <div className={compact ? "state-block state-block--compact" : "state-block"}>
@@ -79,8 +79,8 @@ export const DisabledState = ({
 );
 
 export const ApiUnavailableState = ({
-  title = "API pending",
-  description = "This page has no usable backend route yet, so it stays read-only and does not fabricate response data.",
+  title = "API 待接入",
+  description = "此页面尚无可用的后端路由，因此保持只读状态且不伪造响应数据。",
   action,
   compact = false
 }: Partial<CommonStateProps>) => (
@@ -96,8 +96,8 @@ export const ApiUnavailableState = ({
 );
 
 export const ToolUnavailableState = ({
-  title = "Tool unavailable",
-  description = "The tool adapter is not enabled or has no configured base URL, so related actions stay disabled.",
+  title = "工具不可用",
+  description = "工具适配器未启用或未配置基础 URL，因此相关操作保持禁用状态。",
   action,
   compact = false
 }: Partial<CommonStateProps>) => (

@@ -34,7 +34,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/login", "/auth/register").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/h2-console/**").permitAll()
+                // 开发环境：允许所有API访问
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

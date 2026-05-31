@@ -11,29 +11,29 @@ const { TextArea } = Input;
 const { Paragraph, Text } = Typography;
 
 const lifecycleStatusOptions = [
-  { label: "DRAFT", value: "DRAFT" },
-  { label: "CONFIRMED", value: "CONFIRMED" },
-  { label: "ARCHIVED", value: "ARCHIVED" }
+  { label: "草稿", value: "DRAFT" },
+  { label: "已确认", value: "CONFIRMED" },
+  { label: "已归档", value: "ARCHIVED" }
 ];
 
 const modelColumns: ColumnsType<ModelProfile> = [
-  { title: "Display Name", dataIndex: "displayName", render: (v) => v ?? "--" },
-  { title: "Version", dataIndex: "version", width: 80, render: (v) => v ?? "--" },
-  { title: "Auth Status", dataIndex: "authorizationStatus", width: 120, render: (v) => v ?? "--" },
-  { title: "Status", dataIndex: "status", width: 100, render: (v) => <Tag>{v ?? "--"}</Tag> },
-  { title: "Category Scopes", dataIndex: "categoryScopes", render: (v) => textFromUnknown(v) },
-  { title: "Style Tags", dataIndex: "styleTags", render: (v) => textFromUnknown(v) },
-  { title: "Updated", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
+  { title: "显示名称", dataIndex: "displayName", render: (v) => v ?? "--" },
+  { title: "版本", dataIndex: "version", width: 80, render: (v) => v ?? "--" },
+  { title: "授权状态", dataIndex: "authorizationStatus", width: 120, render: (v) => v ?? "--" },
+  { title: "状态", dataIndex: "status", width: 100, render: (v) => <Tag>{v ?? "--"}</Tag> },
+  { title: "类目范围", dataIndex: "categoryScopes", render: (v) => textFromUnknown(v) },
+  { title: "风格标签", dataIndex: "styleTags", render: (v) => textFromUnknown(v) },
+  { title: "更新时间", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
 ];
 
 const skcColumns: ColumnsType<SkcPolicy> = [
-  { title: "Policy Name", dataIndex: "name", render: (v) => v ?? "--" },
-  { title: "Category", dataIndex: "categoryCode", width: 140, render: (v) => v ?? "--" },
-  { title: "Colors", dataIndex: "colorCount", width: 80, render: (v) => v ?? "--" },
-  { title: "Specs", dataIndex: "specCount", width: 80, render: (v) => v ?? "--" },
-  { title: "Render Mode", dataIndex: "renderMode", width: 120, render: (v) => v ?? "--" },
-  { title: "Status", dataIndex: "status", width: 100, render: (v) => <Tag>{v ?? "--"}</Tag> },
-  { title: "Updated", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
+  { title: "策略名称", dataIndex: "name", render: (v) => v ?? "--" },
+  { title: "类目", dataIndex: "categoryCode", width: 140, render: (v) => v ?? "--" },
+  { title: "颜色数", dataIndex: "colorCount", width: 80, render: (v) => v ?? "--" },
+  { title: "规格数", dataIndex: "specCount", width: 80, render: (v) => v ?? "--" },
+  { title: "渲染模式", dataIndex: "renderMode", width: 120, render: (v) => v ?? "--" },
+  { title: "状态", dataIndex: "status", width: 100, render: (v) => <Tag>{v ?? "--"}</Tag> },
+  { title: "更新时间", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
 ];
 
 function ModelProfilesPanel() {
@@ -77,21 +77,21 @@ function ModelProfilesPanel() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <Card title="Model Profiles">
+      <Card title="模型档案">
         <Paragraph>Connected to <Text code>/api/v1/model-profiles</Text></Paragraph>
       </Card>
       <Card title="New Profile">
         <Form form={form} layout="vertical" onFinish={(values) => void mutation.mutateAsync(values)}>
           <Space direction="vertical" size={12} style={{ width: "100%" }}>
-            <Form.Item name="displayName" label="Display Name" rules={[{ required: true }]}>
+            <Form.Item name="displayName" label="显示名称" rules={[{ required: true }]}>
               <Input placeholder="e.g. Model A" />
             </Form.Item>
             <Space wrap>
               <Form.Item name="height" label="Height (cm)"><InputNumber style={{ width: 120 }} /></Form.Item>
               <Form.Item name="weight" label="Weight (kg)"><InputNumber style={{ width: 120 }} /></Form.Item>
             </Space>
-            <Form.Item name="styleTags" label="Style Tags"><TextArea rows={2} placeholder="clean, premium" /></Form.Item>
-            <Form.Item name="categoryScopes" label="Category Scopes"><TextArea rows={2} placeholder="women-dress" /></Form.Item>
+            <Form.Item name="styleTags" label="风格标签"><TextArea rows={2} placeholder="clean, premium" /></Form.Item>
+            <Form.Item name="categoryScopes" label="类目范围"><TextArea rows={2} placeholder="women-dress" /></Form.Item>
             {mutation.isError ? <Alert showIcon type="error" message="Failed" description={mutation.error instanceof Error ? mutation.error.message : "Error"} /> : null}
             <Space><Button type="primary" htmlType="submit" loading={mutation.isPending}>Save</Button><Button onClick={() => form.resetFields()}>Reset</Button></Space>
           </Space>
@@ -146,7 +146,7 @@ function SkcPoliciesPanel() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <Card title="SKC Policies"><Paragraph>Connected to <Text code>/api/v1/skc-policies</Text></Paragraph></Card>
+      <Card title="SKC 策略"><Paragraph>Connected to <Text code>/api/v1/skc-policies</Text></Paragraph></Card>
       <Card title="New SKC Policy">
         <Form form={form} layout="vertical" onFinish={(values) => void mutation.mutateAsync(values)}>
           <Space direction="vertical" size={12} style={{ width: "100%" }}>
@@ -155,7 +155,7 @@ function SkcPoliciesPanel() {
               <Form.Item name="categoryCode" label="Category"><Input style={{ width: 200 }} /></Form.Item>
               <Form.Item name="colorCount" label="Colors"><InputNumber style={{ width: 100 }} /></Form.Item>
               <Form.Item name="specCount" label="Specs"><InputNumber style={{ width: 100 }} /></Form.Item>
-              <Form.Item name="renderMode" label="Render Mode"><Select allowClear options={[{ label: "MODEL", value: "MODEL" }, { label: "FLAT_LAY", value: "FLAT_LAY" }, { label: "REAL_PRODUCT", value: "REAL_PRODUCT" }, { label: "MIXED", value: "MIXED" }]} style={{ width: 160 }} /></Form.Item>
+              <Form.Item name="renderMode" label="渲染模式"><Select allowClear options={[{ label: "MODEL", value: "MODEL" }, { label: "FLAT_LAY", value: "FLAT_LAY" }, { label: "REAL_PRODUCT", value: "REAL_PRODUCT" }, { label: "MIXED", value: "MIXED" }]} style={{ width: 160 }} /></Form.Item>
             </Space>
             {mutation.isError ? <Alert showIcon type="error" message="Failed" description={mutation.error instanceof Error ? mutation.error.message : "Error"} /> : null}
             <Space><Button type="primary" htmlType="submit" loading={mutation.isPending}>Save</Button><Button onClick={() => form.resetFields()}>Reset</Button></Space>
@@ -172,5 +172,5 @@ function SkcPoliciesPanel() {
 }
 
 export default function ModelProfilesPage() {
-  return <Tabs items={[{ key: "profiles", label: "Model Profiles", children: <ModelProfilesPanel /> }, { key: "skc", label: "SKC Policies", children: <SkcPoliciesPanel /> }]} />;
+  return <Tabs items={[{ key: "profiles", label: "模型档案", children: <ModelProfilesPanel /> }, { key: "skc", label: "SKC 策略", children: <SkcPoliciesPanel /> }]} />;
 }

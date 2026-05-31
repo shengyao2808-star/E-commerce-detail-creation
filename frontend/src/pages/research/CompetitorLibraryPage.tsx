@@ -1,27 +1,42 @@
-import { Card, Empty } from "antd";
-import { P0Scaffold } from "../p0/P0Scaffold";
+import { Button, Card, Empty, Space } from "antd";
+import { Link } from "react-router-dom";
+import { PlusOutlined } from "@ant-design/icons";
 
 export default function CompetitorLibraryPage() {
   return (
-    <P0Scaffold
-      eyebrow="Research"
-      title="Competitor Library"
-      description="This page stays empty until the backend provides compliant competitor-library APIs. No external scraping, fake brands, rankings, or evidence are shown here."
-      apiNotice
-      toolNotice
-      capabilities={[
-        { title: "Competitor Records", description: "Pending backend research/competitor business APIs.", status: "pending" },
-        {
-          title: "Evidence & Authorization",
-          description: "Source links, authorization scope, and collection timestamps are pending backend support.",
-          status: "pending"
-        },
-        { title: "Visual Tags", description: "Tagging rules and tooling integration are pending.", status: "disabled" }
-      ]}
-    >
-      <Card className="p0-card" title="Competitor Data">
-        <Empty description="No real competitor data is available yet. Connect compliant backend sources first, then render the list." />
+    <div>
+      {/* 页面标题 */}
+      <div className="df-page-header">
+        <h1 className="df-page-title">竞品库</h1>
+        <p className="df-page-desc">管理竞品信息，分析竞品策略</p>
+      </div>
+
+      {/* 空状态 */}
+      <Card>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "var(--df-space-8) var(--df-space-6)",
+          textAlign: "center"
+        }}>
+          <div style={{ fontSize: 48, color: "var(--df-text-muted)", marginBottom: "var(--df-space-4)" }}>
+            🏢
+          </div>
+          <h3 style={{ fontSize: "var(--df-text-lg)", color: "var(--df-text)", marginBottom: "var(--df-space-2)" }}>
+            暂无竞品数据
+          </h3>
+          <p style={{ color: "var(--df-text-muted)", marginBottom: "var(--df-space-5)", maxWidth: 320 }}>
+            竞品库功能开发中，敬请期待
+          </p>
+          <Space>
+            <Link to="/research">
+              <Button>返回调研中心</Button>
+            </Link>
+          </Space>
+        </div>
       </Card>
-    </P0Scaffold>
+    </div>
   );
 }

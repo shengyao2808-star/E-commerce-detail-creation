@@ -29,14 +29,14 @@ const statusOptions = [
 ];
 
 const policyColumns: ColumnsType<CategoryVisualPolicy> = [
-  { title: "Category Code", dataIndex: "categoryCode", width: 140, render: (v) => v ?? "--" },
-  { title: "Category Name", dataIndex: "categoryName", width: 180, render: (v) => v ?? "--" },
-  { title: "Model Policy", dataIndex: "modelPolicy", width: 120, render: (v) => <Tag>{textFromUnknown(v)}</Tag> },
+  { title: "类目编码", dataIndex: "categoryCode", width: 140, render: (v) => v ?? "--" },
+  { title: "类目名称", dataIndex: "categoryName", width: 180, render: (v) => v ?? "--" },
+  { title: "模型策略", dataIndex: "modelPolicy", width: 120, render: (v) => <Tag>{textFromUnknown(v)}</Tag> },
   { title: "Consistency", dataIndex: "modelConsistencyLevel", width: 120, render: (v) => <Tag color="blue">{textFromUnknown(v)}</Tag> },
   { title: "Shot Types", dataIndex: "allowedShotTypes", render: (v) => textFromUnknown(v) },
   { title: "Risk Rules", dataIndex: "riskRules", render: (v) => textFromUnknown(v) },
-  { title: "Status", dataIndex: "status", width: 100, render: (v) => v ?? "--" },
-  { title: "Updated", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
+  { title: "状态", dataIndex: "status", width: 100, render: (v) => v ?? "--" },
+  { title: "更新时间", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
 ];
 
 export default function CategoryVisualPoliciesPage() {
@@ -100,7 +100,7 @@ export default function CategoryVisualPoliciesPage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <Card title="Category Visual Policies">
+      <Card title="类目视觉策略">
         <Space wrap>
           {summary.map((item) => (
             <Tag key={item.label} color="blue">
@@ -117,15 +117,15 @@ export default function CategoryVisualPoliciesPage() {
         <Form form={form} layout="vertical" onFinish={(values) => void createMutation.mutateAsync(values)}>
           <Space direction="vertical" size={12} style={{ width: "100%" }}>
             <Space wrap style={{ width: "100%" }}>
-              <Form.Item name="categoryCode" label="Category Code" rules={[{ required: true, message: "Required" }]} style={{ flex: 1, minWidth: 220 }}>
+              <Form.Item name="categoryCode" label="类目编码" rules={[{ required: true, message: "Required" }]} style={{ flex: 1, minWidth: 220 }}>
                 <Input placeholder="e.g. WOMEN_DRESS" />
               </Form.Item>
-              <Form.Item name="categoryName" label="Category Name" rules={[{ required: true, message: "Required" }]} style={{ flex: 1, minWidth: 220 }}>
+              <Form.Item name="categoryName" label="类目名称" rules={[{ required: true, message: "Required" }]} style={{ flex: 1, minWidth: 220 }}>
                 <Input placeholder="e.g. Dresses" />
               </Form.Item>
             </Space>
             <Space wrap style={{ width: "100%" }}>
-              <Form.Item name="modelPolicy" label="Model Policy" style={{ flex: 1, minWidth: 180 }}>
+              <Form.Item name="modelPolicy" label="模型策略" style={{ flex: 1, minWidth: 180 }}>
                 <Select allowClear options={[{ label: "REQUIRED", value: "REQUIRED" }, { label: "OPTIONAL", value: "OPTIONAL" }, { label: "FORBIDDEN", value: "FORBIDDEN" }]} />
               </Form.Item>
               <Form.Item name="modelConsistencyLevel" label="Consistency Level" style={{ flex: 1, minWidth: 180 }}>

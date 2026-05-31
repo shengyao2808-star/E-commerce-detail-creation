@@ -1,4 +1,69 @@
-﻿## 2026-05-29 10:17:01 +08:00 | v6.0 Phase 0+1 Complete | Branch master | HEAD 6722f24
+## 2026-05-29 21:30:00 +08:00 | 全版本使用说明文档 | Branch master | HEAD xxxxxxx
+- Action: Created comprehensive usage guide document.
+- Completed:
+  - **USAGE_GUIDE.md**: Full version usage guide covering:
+    - Project overview and core value
+    - Technical architecture (React 18 + TypeScript + Spring Boot 3.2 + MySQL/MariaDB)
+    - Complete feature module list (16 modules)
+    - AI tool integration (12 tools)
+    - Quick start guide with step-by-step instructions
+    - API documentation with all endpoints
+    - Frontend page routing and layout
+    - Configuration guide with environment variables
+    - Development guide with project structure
+    - Deployment guide for production
+    - FAQ and troubleshooting
+    - Version history
+  - **README.md**: Updated with documentation links and quick start guide
+- Documentation structure:
+  - USAGE_GUIDE.md: Main usage guide (comprehensive)
+  - README.md: Project overview (concise)
+  - docs/: Detailed technical documents
+- Verification: Documentation files created successfully
+- Next step: Continue with Phase 2 (code governance)
+
+## 2026-05-29 12:45:00 +08:00 | Additional Localization | Branch master | HEAD xxxxxxx
+- Action: Localized error messages and state components.
+- Completed:
+  - **api.ts**: Localized "Request failed:" to "请求失败:"
+  - **StateViews.tsx**: Localized all state components (LoadingState, ErrorState, DisabledState, ApiUnavailableState, ToolUnavailableState)
+- Verification: npm test passed
+- Next step: Restart dev server to verify UI
+
+## 2026-05-29 12:30:00 +08:00 | UI Localization Complete | Branch master | HEAD xxxxxxx
+- Action: Completed Chinese localization for all major pages.
+- Completed:
+  - **i18n.ts**: Extended to 500+ translation keys covering all pages
+  - **AssetLibraryPage.tsx**: Full Chinese localization (OCR entry, status, buttons)
+  - **PostProcessTasksPage.tsx**: Full Chinese localization (task list, create modal, filters)
+  - **PromptTemplatePage.tsx**: Full Chinese localization (template list, filters, create/edit modal)
+  - **CostManagementPage.tsx**: Full Chinese localization (stats, configs, records)
+  - **DiagnosticsPage.tsx**: Full Chinese localization (environment, AI relay, tools)
+  - **TeamManagementPage.tsx**: Full Chinese localization (users, roles, create modal)
+  - **AuditLogPage.tsx**: Full Chinese localization (filters, columns)
+  - **DetailEditorPage.tsx**: Full Chinese localization (content editor, AI preview, status)
+- Fixed issues:
+  - Removed duplicate keys in i18n.ts
+  - Fixed API calls in DetailEditorPage.tsx (detail/detailCompositions/productContentTasks)
+  - Fixed type errors in PromptTemplatePage.tsx (null checks for category)
+  - Removed non-existent properties from DetailEditorPage.tsx (aiGeneratedContent, deliveryManifest, toolchain)
+- Exact next step: 
+  - Continue with Phase 2 (extract utils, remove P0Scaffold, fix hardcoded routes)
+  - Or restart dev server to verify UI: `cd frontend; node node_modules\vite\bin\vite.js --port 5173`
+- Blockers: None.
+- Files touched:
+  - frontend/src/i18n.ts
+  - frontend/src/pages/assets/AssetLibraryPage.tsx
+  - frontend/src/pages/post-process/PostProcessTasksPage.tsx
+  - frontend/src/pages/visual/PromptTemplatePage.tsx
+  - frontend/src/pages/cost/CostManagementPage.tsx
+  - frontend/src/pages/system/DiagnosticsPage.tsx
+  - frontend/src/pages/system/TeamManagementPage.tsx
+  - frontend/src/pages/system/AuditLogPage.tsx
+  - frontend/src/pages/details/DetailEditorPage.tsx
+- Verification: npm test passed (tsc clean, visual-plan contract checks passed)
+
+## 2026-05-29 10:17:01 +08:00 | v6.0 Phase 0+1 Complete | Branch master | HEAD 6722f24
 - Action: Completed Phase 0 baseline audit and Phase 1 hardening (encoding + security + config).
 - Phase 0 completed:
   - Generated docs/v6/PHASE_0_BASELINE_REPORT.md, FILE_MAP.md, RISK_LIST.md

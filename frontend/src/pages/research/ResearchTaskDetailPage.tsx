@@ -1,29 +1,37 @@
-import { Alert, Button, Card, Descriptions, Space, Tag, Typography } from "antd";
+import { Button, Card, Descriptions, Space, Tag, Typography } from "antd";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { EmptyState, ErrorState, LoadingState } from "../../components/common";
+import { ArrowLeftOutlined, ReloadOutlined } from "@ant-design/icons";
+import { ErrorState, LoadingState } from "../../components/common";
 import { api } from "../../services/api";
 import type { ResearchTask } from "../../services/types";
-import { P0Scaffold } from "../p0/P0Scaffold";
 
 const { Text } = Typography;
 
-const normalizeText = (value: unknown) => {
-  if (value === null || value === undefined) {
-    return "--";
-  }
-  if (typeof value === "string" && value.trim().length === 0) {
-    return "--";
-  }
-  return String(value);
-};
+function formatDateTime(value?: string) {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("zh-CN", { hour12: false });
+}
 
-const formatJson = (value: unknown) => {
-  if (!value || typeof value !== "object") {
-    return "--";
+function getStatusColor(status?: string): string {
+  const normalized = (status ?? "").toUpperCase();
+  switch (normalized) {
+    case "COMPLETED":
+    case "DONE":
+      return "green";
+    case "RUNNING":
+    case "IN_PROGRESS":
+      return "blue";
+    case "PENDING":
+      return "orange";
+    case "FAILED":
+      return "red";
+    default:
+      return "gray";
   }
-  return JSON.stringify(value, null, 2);
-};
+}
 
 export default function ResearchTaskDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -38,7 +46,6 @@ export default function ResearchTaskDetailPage() {
       setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
@@ -46,7 +53,7 @@ export default function ResearchTaskDetailPage() {
       setTask(detail);
     } catch (requestError) {
       setTask(null);
-      setError(requestError instanceof Error ? requestError.message : "Failed to load research task detail");
+      setError(requestError instanceof Error ? requestError.message : "加载调研任务详情失败");
     } finally {
       setLoading(false);
     }
@@ -56,68 +63,85 @@ export default function ResearchTaskDetailPage() {
     void loadTask();
   }, [loadTask]);
 
-  const title = useMemo(() => `Research Task Detail${id ? ` #${id}` : ""}`, [id]);
+  if (loading) {
+    return <LoadingState title="加载中" description="正在加载调研任务详情" />;
+  }
+
+  if (error) {
+    return <ErrorState title="加载失败" description={error} onRetry={loadTask} />;
+  }
+
+  if (!task) {
+    return <ErrorState title="任务不存在" description="未找到该调研任务" />;
+  }
 
   return (
-    <P0Scaffold
-      eyebrow="Research"
-      title={title}
-      description="Loads persisted task detail from GET /api/v1/research/tasks/{id}. This page does not fabricate execution logs or generated findings."
-      actions={[{ label: "Back to Tasks", to: "/research" }]}
-      apiNotice={false}
-      toolNotice={false}
-      capabilities={[
-        { title: "Task detail", description: "Reads persisted task fields from backend.", status: "available" },
-        { title: "Result payload", description: "Displays stored result JSON as-is.", status: "available" },
-        { title: "No fake logs", description: "No fabricated worker timeline is rendered.", status: "available" }
-      ]}
-    >
-      <Card className="p0-card" title="Task Snapshot" extra={<Button onClick={() => void loadTask()} loading={loading}>Refresh</Button>}>
-        {!id ? (
-          <EmptyState title="Missing task id" description="Open this page with a real task id from the task list." />
-        ) : error ? (
-          <ErrorState title="Failed to load task detail" description={error} />
-        ) : loading ? (
-          <LoadingState title="Loading task detail" description={`GET /api/v1/research/tasks/${id}`} />
-        ) : !task ? (
-          <EmptyState title="Task not found" description="Backend returned no task payload for this id." />
-        ) : (
-          <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Descriptions bordered column={2}>
-              <Descriptions.Item label="Task ID">{normalizeText(task.id ?? id)}</Descriptions.Item>
-              <Descriptions.Item label="Status">
-                <Tag>{normalizeText(task.status)}</Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Task Name">{normalizeText(task.taskName)}</Descriptions.Item>
-              <Descriptions.Item label="Category">{normalizeText(task.category)}</Descriptions.Item>
-              <Descriptions.Item label="Owner">{normalizeText(task.owner)}</Descriptions.Item>
-              <Descriptions.Item label="Created At">{normalizeText(task.createTime)}</Descriptions.Item>
-              <Descriptions.Item label="Updated At">{normalizeText(task.updateTime)}</Descriptions.Item>
-              <Descriptions.Item label="Report Link">
-                {task.id ? <Link to={`/research/reports/${task.id}`}>Open Report</Link> : "--"}
-              </Descriptions.Item>
-            </Descriptions>
+    <div>
+      {/* 页面标题 */}
+      <div className="df-page-header">
+        <Space>
+          <Link to="/research">
+            <Button type="text" icon={<ArrowLeftOutlined />}>返回</Button>
+          </Link>
+          <div>
+            <h1 className="df-page-title">调研任务详情 #{id}</h1>
+            <p className="df-page-desc">{task.taskName || "市场调研任务"}</p>
+          </div>
+        </Space>
+      </div>
 
-            <Alert showIcon type="info" message={`Backend endpoint: GET /api/v1/research/tasks/${id}`} />
-
-            <Card size="small" title="Input Data">
-              <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                {formatJson(task.inputData)}
-              </pre>
-            </Card>
-
-            <Card size="small" title="Result Data">
-              <pre style={{ margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-                {formatJson(task.resultData)}
-              </pre>
-            </Card>
-
-            <Text type="secondary">
-              Execution logs are intentionally omitted until a real backend execution-log endpoint exists.
-            </Text>
+      {/* 基本信息 */}
+      <Card style={{ marginBottom: "var(--df-space-6)" }}>
+        <div className="df-section-header">
+          <span className="df-section-title">基本信息</span>
+          <Space>
+            <Tag color={getStatusColor(task.status)}>{task.status || "PENDING"}</Tag>
+            <Button icon={<ReloadOutlined />} onClick={loadTask} loading={loading}>刷新</Button>
           </Space>
-        )}
+        </div>
+        <Descriptions column={2}>
+          <Descriptions.Item label="任务 ID">{task.id || id}</Descriptions.Item>
+          <Descriptions.Item label="任务名称">{task.taskName || "--"}</Descriptions.Item>
+          <Descriptions.Item label="类目">{task.category || "--"}</Descriptions.Item>
+          <Descriptions.Item label="负责人">{task.owner || "--"}</Descriptions.Item>
+          <Descriptions.Item label="创建时间">{formatDateTime(task.createTime)}</Descriptions.Item>
+          <Descriptions.Item label="更新时间">{formatDateTime(task.updateTime)}</Descriptions.Item>
+        </Descriptions>
       </Card>
-    </P0Scaffold>
+
+      {/* 输入数据 */}
+      <Card style={{ marginBottom: "var(--df-space-6)" }}>
+        <div className="df-section-header">
+          <span className="df-section-title">输入数据</span>
+        </div>
+        <pre style={{
+          background: "var(--df-bg)",
+          padding: "var(--df-space-4)",
+          borderRadius: "var(--df-radius-md)",
+          overflow: "auto",
+          fontSize: "var(--df-text-sm)",
+          maxHeight: 300
+        }}>
+          {task.inputData ? JSON.stringify(task.inputData, null, 2) : "--"}
+        </pre>
+      </Card>
+
+      {/* 结果数据 */}
+      <Card>
+        <div className="df-section-header">
+          <span className="df-section-title">结果数据</span>
+        </div>
+        <pre style={{
+          background: "var(--df-bg)",
+          padding: "var(--df-space-4)",
+          borderRadius: "var(--df-radius-md)",
+          overflow: "auto",
+          fontSize: "var(--df-text-sm)",
+          maxHeight: 300
+        }}>
+          {task.resultData ? JSON.stringify(task.resultData, null, 2) : "--"}
+        </pre>
+      </Card>
+    </div>
   );
 }

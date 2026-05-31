@@ -17,24 +17,25 @@ import {
 } from "antd";
 import { useCallback, useState } from "react";
 import { api } from "../../services/api";
+import { useLang } from "../../i18n";
 import type { PromptTemplate, PromptTemplateCreateRequest } from "../../services/types";
 
 const { TextArea } = Input;
 const { Paragraph, Text } = Typography;
 
 const CATEGORIES = [
-  { value: "PRODUCT_MAIN", label: "Product Main" },
-  { value: "DETAIL_SCENE", label: "Detail Scene" },
-  { value: "MODEL_SHOT", label: "Model Shot" },
-  { value: "FLAT_LAY", label: "Flat Lay" },
-  { value: "BACKGROUND", label: "Background" },
-  { value: "LIFESTYLE", label: "Lifestyle" },
-  { value: "BRAND_STORY", label: "Brand Story" }
+  { value: "PRODUCT_MAIN", label: "商品主图" },
+  { value: "DETAIL_SCENE", label: "详情场景" },
+  { value: "MODEL_SHOT", label: "模特拍摄" },
+  { value: "FLAT_LAY", label: "平铺拍摄" },
+  { value: "BACKGROUND", label: "背景" },
+  { value: "LIFESTYLE", label: "生活方式" },
+  { value: "BRAND_STORY", label: "品牌故事" }
 ];
 
-const PLATFORMS = ["TAOBAO", "JD", "PINDUODUO", "DOUYIN", "AMAZON", "SHOPIFY", "GENERAL"];
-const STYLES = ["MINIMALIST", "LUXURY", "CUTE", "TECH", "VINTAGE", "FRESH", "DARK", "BRIGHT"];
-const SOURCES = ["SYSTEM", "COMMUNITY", "CUSTOM", "GITHUB"];
+const PLATFORMS = ["淘宝", "京东", "拼多多", "抖音", "亚马逊", "Shopify", "通用"];
+const STYLES = ["极简", "奢华", "可爱", "科技", "复古", "清新", "暗黑", "明亮"];
+const SOURCES = ["系统", "社区", "自定义", "GitHub"];
 
 const categoryColor: Record<string, string> = {
   PRODUCT_MAIN: "blue",
@@ -47,6 +48,7 @@ const categoryColor: Record<string, string> = {
 };
 
 export default function PromptTemplatePage() {
+  const { t } = useLang();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<{
     category?: string;
@@ -71,7 +73,7 @@ export default function PromptTemplatePage() {
         ? api.promptTemplates.update(editModal.editing.id!, values)
         : api.promptTemplates.create(values),
     onSuccess: () => {
-      message.success(editModal.editing ? "Template updated" : "Template created");
+      message.success(editModal.editing ? t("common.success") : t("common.success"));
       setEditModal({ open: false });
       createForm.resetFields();
       queryClient.invalidateQueries({ queryKey: ["prompt-templates"] });
@@ -81,7 +83,7 @@ export default function PromptTemplatePage() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.promptTemplates.delete(id),
     onSuccess: () => {
-      message.success("Template deleted");
+      message.success(t("common.success"));
       queryClient.invalidateQueries({ queryKey: ["prompt-templates"] });
     }
   });
@@ -89,7 +91,7 @@ export default function PromptTemplatePage() {
   const duplicateMutation = useMutation({
     mutationFn: (id: number) => api.promptTemplates.duplicate(id),
     onSuccess: () => {
-      message.success("Template duplicated");
+      message.success(t("common.success"));
       queryClient.invalidateQueries({ queryKey: ["prompt-templates"] });
     }
   });
@@ -124,11 +126,11 @@ export default function PromptTemplatePage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <Card title="Prompt Template Library">
+      <Card title={t("template.title")}>
         <Space wrap style={{ marginBottom: 16, width: "100%" }}>
           <Select
             allowClear
-            placeholder="Category"
+            placeholder={t("template.filter.category")}
             style={{ width: 160 }}
             options={CATEGORIES}
             value={filters.category}
@@ -136,7 +138,7 @@ export default function PromptTemplatePage() {
           />
           <Select
             allowClear
-            placeholder="Platform"
+            placeholder={t("template.filter.platform")}
             style={{ width: 140 }}
             options={PLATFORMS.map((p) => ({ value: p, label: p }))}
             value={filters.platform}
@@ -144,7 +146,7 @@ export default function PromptTemplatePage() {
           />
           <Select
             allowClear
-            placeholder="Style"
+            placeholder={t("template.filter.style")}
             style={{ width: 140 }}
             options={STYLES.map((s) => ({ value: s, label: s }))}
             value={filters.style}
@@ -152,125 +154,110 @@ export default function PromptTemplatePage() {
           />
           <Select
             allowClear
-            placeholder="Source"
+            placeholder={t("template.filter.source")}
             style={{ width: 140 }}
             options={SOURCES.map((s) => ({ value: s, label: s }))}
             value={filters.source}
             onChange={(v) => { setFilters((f) => ({ ...f, source: v })); setPageNum(1); }}
           />
           <Input.Search
-            placeholder="Search templates..."
-            style={{ width: 240 }}
-            allowClear
-            onSearch={(v) => { setFilters((f) => ({ ...f, keyword: v || undefined })); setPageNum(1); }}
+            placeholder={t("template.search")}
+            style={{ width: 220 }}
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value }))}
+            onSearch={() => setPageNum(1)}
           />
           <Button type="primary" onClick={() => openEdit()}>
-            + New Template
+            {t("template.create")}
           </Button>
         </Space>
 
         {isLoading ? (
-          <div style={{ textAlign: "center", padding: 40 }}>Loading...</div>
+          <div style={{ textAlign: "center", padding: 40 }}>{t("common.loading")}</div>
         ) : templates.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#999" }}>No templates found</div>
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <div>{t("template.noTemplates")}</div>
+            <div style={{ color: "#999", marginTop: 8 }}>{t("template.noTemplates.desc")}</div>
+          </div>
         ) : (
           <Row gutter={[16, 16]}>
-            {templates.map((t) => (
-              <Col key={t.id} xs={24} sm={12} md={8} lg={6}>
+            {templates.map((template) => (
+              <Col key={template.id} xs={24} sm={12} md={8} lg={6}>
                 <Card
-                  hoverable
                   size="small"
-                  style={{ height: "100%" }}
-                  onClick={() => setDetailDrawer(t)}
+                  hoverable
+                  onClick={() => setDetailDrawer(template)}
                   actions={[
-                    <span key="use" onClick={(e) => { e.stopPropagation(); api.promptTemplates.use(t.id!).then(() => message.success("Usage recorded")); }}>
-                      Use
-                    </span>,
-                    <span key="dup" onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(t.id!); }}>
-                      Duplicate
-                    </span>,
-                    <span key="edit" onClick={(e) => { e.stopPropagation(); openEdit(t); }}>
-                      Edit
-                    </span>
+                    <Button key="edit" type="link" size="small" onClick={(e) => { e.stopPropagation(); openEdit(template); }}>
+                      {t("template.edit")}
+                    </Button>,
+                    <Button key="duplicate" type="link" size="small" onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate(template.id!); }}>
+                      {t("template.duplicate")}
+                    </Button>,
+                    <Popconfirm key="delete" title={t("template.deleteConfirm")} onConfirm={() => deleteMutation.mutate(template.id!)}>
+                      <Button type="link" size="small" danger onClick={(e) => e.stopPropagation()}>
+                        {t("template.delete")}
+                      </Button>
+                    </Popconfirm>
                   ]}
                 >
-                  <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                    <Text strong ellipsis style={{ fontSize: 13 }}>
-                      {t.templateName}
+                  <div style={{ marginBottom: 8 }}>
+                    <Text strong>{template.templateName}</Text>
+                  </div>
+                  <div style={{ marginBottom: 8 }}>
+                    <Tag color={template.category ? categoryColor[template.category] : "default"}>
+                      {CATEGORIES.find((c) => c.value === template.category)?.label ?? template.category}
+                    </Tag>
+                    {template.platform && <Tag>{template.platform}</Tag>}
+                    {template.style && <Tag>{template.style}</Tag>}
+                  </div>
+                  <Paragraph
+                    type="secondary"
+                    ellipsis={{ rows: 2 }}
+                    style={{ marginBottom: 8, fontSize: 12 }}
+                  >
+                    {template.description || template.positivePrompt}
+                  </Paragraph>
+                  <Space split="|">
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {t("template.usage")}: {template.usageCount ?? 0}
                     </Text>
-                    <Space size={4} wrap>
-                      {t.category && <Tag color={categoryColor[t.category] ?? "default"}>{t.category}</Tag>}
-                      {t.platform && <Tag>{t.platform}</Tag>}
-                      {t.style && <Tag>{t.style}</Tag>}
-                    </Space>
-                    <Paragraph
-                      ellipsis={{ rows: 2 }}
-                      style={{ fontSize: 12, color: "#666", marginBottom: 0, minHeight: 36 }}
-                    >
-                      {t.positivePrompt}
-                    </Paragraph>
-                    <Space size={8}>
-                      <Text type="secondary" style={{ fontSize: 11 }}>
-                        Used: {t.usageCount ?? 0}
-                      </Text>
-                      <Text type="secondary" style={{ fontSize: 11 }}>
-                        Rating: {t.rating ?? 0}
-                      </Text>
-                      <Text type="secondary" style={{ fontSize: 11 }}>
-                        {t.source}
-                      </Text>
-                    </Space>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {t("template.rating")}: {template.rating ?? 0}
+                    </Text>
                   </Space>
                 </Card>
               </Col>
             ))}
           </Row>
         )}
-
-        {data && data.total > 20 && (
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            <Space>
-              <Button disabled={pageNum <= 1} onClick={() => setPageNum((p) => p - 1)}>
-                Previous
-              </Button>
-              <Text>
-                Page {pageNum} / {Math.ceil((data.total ?? 0) / 20)}
-              </Text>
-              <Button
-                disabled={pageNum * 20 >= (data.total ?? 0)}
-                onClick={() => setPageNum((p) => p + 1)}
-              >
-                Next
-              </Button>
-            </Space>
-          </div>
-        )}
       </Card>
 
       {/* Detail Drawer */}
       <Drawer
-        title={detailDrawer?.templateName ?? "Template Detail"}
+        title={detailDrawer?.templateName}
         open={!!detailDrawer}
         onClose={() => setDetailDrawer(null)}
-        width={560}
+        width={480}
       >
         {detailDrawer && (
-          <Space direction="vertical" size={12} style={{ width: "100%" }}>
-            <Space wrap>
-              {detailDrawer.category && <Tag color={categoryColor[detailDrawer.category] ?? "default"}>{detailDrawer.category}</Tag>}
+          <Space direction="vertical" size={16} style={{ width: "100%" }}>
+            <div>
+              <Tag color={detailDrawer.category ? categoryColor[detailDrawer.category] : "default"}>
+                {CATEGORIES.find((c) => c.value === detailDrawer.category)?.label ?? detailDrawer.category}
+              </Tag>
               {detailDrawer.platform && <Tag>{detailDrawer.platform}</Tag>}
               {detailDrawer.style && <Tag>{detailDrawer.style}</Tag>}
-              {detailDrawer.sceneType && <Tag>{detailDrawer.sceneType}</Tag>}
-              {detailDrawer.source && <Tag color="geekblue">{detailDrawer.source}</Tag>}
-            </Space>
+              {detailDrawer.source && <Tag>{detailDrawer.source}</Tag>}
+            </div>
             {detailDrawer.description && <Paragraph>{detailDrawer.description}</Paragraph>}
-            <Card size="small" title="Positive Prompt">
+            <Card size="small" title={t("template.positivePrompt")}>
               <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
                 {detailDrawer.positivePrompt}
               </Paragraph>
             </Card>
             {detailDrawer.negativePrompt && (
-              <Card size="small" title="Negative Prompt">
+              <Card size="small" title={t("template.negativePrompt")}>
                 <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
                   {detailDrawer.negativePrompt}
                 </Paragraph>
@@ -278,7 +265,7 @@ export default function PromptTemplatePage() {
             )}
             {detailDrawer.styleTags && detailDrawer.styleTags.length > 0 && (
               <div>
-                <Text strong>Style Tags: </Text>
+                <Text strong>{t("template.styleTags")}: </Text>
                 {detailDrawer.styleTags.map((tag) => (
                   <Tag key={tag}>{tag}</Tag>
                 ))}
@@ -286,7 +273,7 @@ export default function PromptTemplatePage() {
             )}
             {detailDrawer.constraints && detailDrawer.constraints.length > 0 && (
               <div>
-                <Text strong>Constraints: </Text>
+                <Text strong>{t("template.constraints")}: </Text>
                 {detailDrawer.constraints.map((c) => (
                   <Tag key={c}>{c}</Tag>
                 ))}
@@ -294,26 +281,26 @@ export default function PromptTemplatePage() {
             )}
             {detailDrawer.tags && detailDrawer.tags.length > 0 && (
               <div>
-                <Text strong>Tags: </Text>
+                <Text strong>{t("template.tags")}: </Text>
                 {detailDrawer.tags.map((tag) => (
                   <Tag key={tag} color="blue">{tag}</Tag>
                 ))}
               </div>
             )}
             <Space split="|">
-              <Text type="secondary">Used: {detailDrawer.usageCount ?? 0}</Text>
-              <Text type="secondary">Rating: {detailDrawer.rating ?? 0}</Text>
-              <Text type="secondary">Lang: {detailDrawer.language}</Text>
-              {detailDrawer.author && <Text type="secondary">By: {detailDrawer.author}</Text>}
+              <Text type="secondary">{t("template.usage")}: {detailDrawer.usageCount ?? 0}</Text>
+              <Text type="secondary">{t("template.rating")}: {detailDrawer.rating ?? 0}</Text>
+              <Text type="secondary">{t("template.language")}: {detailDrawer.language}</Text>
+              {detailDrawer.author && <Text type="secondary">{t("template.author")}: {detailDrawer.author}</Text>}
             </Space>
             {detailDrawer.sourceRef && (
               <Text type="secondary" style={{ fontSize: 12 }}>
-                Source: {detailDrawer.sourceRef}
+                {t("template.source")}: {detailDrawer.sourceRef}
               </Text>
             )}
             <Space>
-              <Popconfirm title="Delete this template?" onConfirm={() => { deleteMutation.mutate(detailDrawer.id!); setDetailDrawer(null); }}>
-                <Button danger size="small">Delete</Button>
+              <Popconfirm title={t("template.deleteConfirm")} onConfirm={() => { deleteMutation.mutate(detailDrawer.id!); setDetailDrawer(null); }}>
+                <Button danger size="small">{t("template.delete")}</Button>
               </Popconfirm>
             </Space>
           </Space>
@@ -322,7 +309,7 @@ export default function PromptTemplatePage() {
 
       {/* Create / Edit Modal */}
       <Modal
-        title={editModal.editing ? "Edit Template" : "New Template"}
+        title={editModal.editing ? t("template.edit") : t("template.create")}
         open={editModal.open}
         onCancel={() => setEditModal({ open: false })}
         onOk={() => createForm.submit()}
@@ -332,59 +319,59 @@ export default function PromptTemplatePage() {
         <Form form={createForm} layout="vertical" onFinish={(v) => createMutation.mutate(v)}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="templateName" label="Name" rules={[{ required: true }]}>
+              <Form.Item name="templateName" label={t("template.name")} rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="category" label="Category" rules={[{ required: true }]}>
+              <Form.Item name="category" label={t("template.category")} rules={[{ required: true }]}>
                 <Select options={CATEGORIES} />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="platform" label="Platform">
+              <Form.Item name="platform" label={t("template.platform")}>
                 <Select allowClear options={PLATFORMS.map((p) => ({ value: p, label: p }))} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="style" label="Style">
+              <Form.Item name="style" label={t("template.style")}>
                 <Select allowClear options={STYLES.map((s) => ({ value: s, label: s }))} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="sceneType" label="Scene Type">
-                <Input placeholder="INDOOR / STUDIO..." />
+              <Form.Item name="sceneType" label="场景类型">
+                <Input placeholder="室内 / 棚拍..." />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item name="positivePrompt" label="Positive Prompt" rules={[{ required: true }]}>
+          <Form.Item name="positivePrompt" label="正向提示词" rules={[{ required: true }]}>
             <TextArea rows={4} />
           </Form.Item>
-          <Form.Item name="negativePrompt" label="Negative Prompt">
+          <Form.Item name="negativePrompt" label="反向提示词">
             <TextArea rows={3} />
           </Form.Item>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="description" label="Description">
+              <Form.Item name="description" label="描述">
                 <TextArea rows={2} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="tags" label="Tags">
-                <Select mode="tags" placeholder="Enter tags" />
+              <Form.Item name="tags" label="标签">
+                <Select mode="tags" placeholder="输入标签" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="author" label="Author">
+              <Form.Item name="author" label="作者">
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="language" label="Language" initialValue="zh-CN">
+              <Form.Item name="language" label="语言" initialValue="zh-CN">
                 <Input />
               </Form.Item>
             </Col>

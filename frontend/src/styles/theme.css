@@ -1,84 +1,74 @@
 /* ============================================================
-   DetailFlow v6.0 - Minimal Zen Design Token System
+   DetailFlow - 浅色 SaaS 工作台主题系�?(参考图对齐�?
    ============================================================ */
 
 :root {
   color-scheme: light;
 
-  /* --- Color Tokens --- */
-  --color-primary: #c0392b;
-  --color-primary-light: rgba(192, 57, 43, 0.08);
-  --color-primary-border: rgba(192, 57, 43, 0.2);
-  --color-success: #27ae60;
-  --color-success-light: rgba(39, 174, 96, 0.08);
-  --color-warning: #d4a017;
-  --color-warning-light: rgba(212, 160, 23, 0.08);
-  --color-error: #c0392b;
-  --color-error-light: rgba(192, 57, 43, 0.08);
-  --color-info: #5b7fa5;
-  --color-info-light: rgba(91, 127, 165, 0.08);
+  /* --- 主色 --- */
+  --df-primary: #5B52E0;
+  --df-primary-hover: #463CF0;
+  --df-primary-soft: #EEEDFE;
 
-  /* --- Surface & Background --- */
-  --bg-page: #f5f0eb;
-  --bg-card: #fefcfa;
-  --bg-sidebar: #fefcfa;
-  --bg-topbar: #fefcfa;
-  --bg-hover: rgba(192, 57, 43, 0.04);
-  --bg-active: rgba(192, 57, 43, 0.06);
-  --bg-muted: #f8f5f0;
+  /* --- 功能�?--- */
+  --df-success: #16A34A;
+  --df-success-soft: #DCFCE7;
+  --df-warning: #F97316;
+  --df-warning-soft: #FFEDD5;
+  --df-danger: #EF4444;
+  --df-danger-soft: #FEE2E2;
+  --df-purple: #7C3AED;
+  --df-purple-soft: #F3E8FF;
 
-  /* --- Text --- */
-  --text-primary: #2c2318;
-  --text-secondary: #6b5e50;
-  --text-muted: #a09484;
-  --text-inverse: #fefcfa;
+  /* --- 表面与背�?--- */
+  --df-bg: #FAFAFD;
+  --df-surface: #FEFEFF;
+  --df-surface-hover: #F4F3FE;
 
-  /* --- Border --- */
-  --border-default: #e8dfd5;
-  --border-light: #f0ece4;
-  --border-active: var(--color-primary);
+  /* --- 文字 --- */
+  --df-text: #1A1836;
+  --df-text-secondary: #3D3A5C;
+  --df-text-muted: #6B7280;
 
-  /* --- Shadows (restrained) --- */
-  --shadow-sm: 0 1px 2px rgba(44, 35, 24, 0.04);
-  --shadow-md: 0 2px 8px rgba(44, 35, 24, 0.06);
-  --shadow-lg: 0 4px 16px rgba(44, 35, 24, 0.08);
+  /* --- 边框 --- */
+  --df-border: #E4E3F0;
+  --df-border-soft: #EEEFF8;
 
-  /* --- Typography --- */
-  --font-family: "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, sans-serif;
-  --font-size-page-title: 22px;
-  --font-size-section-title: 15px;
-  --font-size-body: 13px;
-  --font-size-caption: 12px;
-  --font-size-label: 11px;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
+  /* --- 阴影 --- */
+  --df-shadow-soft: 0 8px 24px rgba(75, 60, 240, 0.06);
 
-  /* --- Spacing --- */
-  --space-page: 24px;
-  --space-card: 20px;
-  --space-section: 20px;
-  --space-item: 12px;
-  --space-form: 12px;
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
+  /* --- 字体 --- */
+  --df-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 
-  /* --- Border Radius --- */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-pill: 20px;
+  /* --- 字号 --- */
+  --df-text-xs: 12px;
+  --df-text-sm: 13px;
+  --df-text-base: 14px;
+  --df-text-lg: 15px;
+  --df-text-xl: 16px;
+  --df-text-2xl: 20px;
+  --df-text-3xl: 28px;
 
-  /* --- Layout --- */
-  --sidebar-width: 220px;
-  --sidebar-collapsed: 60px;
-  --topbar-height: 52px;
-  --assistant-width: 320px;
+  /* --- 间距 --- */
+  --df-space-1: 4px;
+  --df-space-2: 8px;
+  --df-space-3: 12px;
+  --df-space-4: 16px;
+  --df-space-5: 20px;
+  --df-space-6: 24px;
+  --df-space-8: 32px;
 
-  font-family: var(--font-family);
+  /* --- 圆角 --- */
+  --df-radius-sm: 8px;
+  --df-radius-md: 10px;
+  --df-radius-lg: 14px;
+
+  /* --- 布局 --- */
+  --df-sidebar-width: 220px;
+  --df-topbar-height: 64px;
+  --df-assistant-width: 360px;
+
+  font-family: var(--df-font);
 }
 
 * {
@@ -87,45 +77,28 @@
 
 html, body, #root {
   min-height: 100%;
+  margin: 0;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  color: var(--text-primary);
-  background: var(--bg-page);
-  font-family: var(--font-family);
-  font-size: var(--font-size-body);
+  color: var(--df-text);
+  background: var(--df-bg);
+  font-family: var(--df-font);
+  font-size: var(--df-text-base);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--color-primary);
-  text-decoration: none;
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-/* --- Ant Design Override --- */
-.ant-typography {
-  letter-spacing: 0;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.ant-btn, .ant-tag, .ant-input, .ant-select-selector, .ant-table-wrapper {
-  letter-spacing: 0;
-}
-
-.ant-card {
-  border-radius: var(--radius-md) !important;
-}
-
-.ant-table {
-  font-size: var(--font-size-body) !important;
-}
-
-.ant-table-thead > tr > th {
-  font-size: var(--font-size-label) !important;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted) !important;
-  font-weight: var(--font-weight-semibold) !important;
+::-webkit-scrollbar-thumb {
+  background: var(--df-border);
+  border-radius: 3px;
 }

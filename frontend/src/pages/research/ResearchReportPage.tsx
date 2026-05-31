@@ -1,26 +1,51 @@
-import { Card, Empty } from "antd";
-import { useParams } from "react-router-dom";
-import { P0Scaffold } from "../p0/P0Scaffold";
+import { Button, Card, Empty, Space } from "antd";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeftOutlined, FileTextOutlined } from "@ant-design/icons";
 
 export default function ResearchReportPage() {
   const { id } = useParams<{ id: string }>();
 
   return (
-    <P0Scaffold
-      eyebrow="Research"
-      title={`Research Report${id ? ` #${id}` : ""}`}
-      description="Report output remains pending until backend report APIs and verified evidence payloads are available. No generated competitor rankings or conclusions are shown here."
-      apiNotice
-      toolNotice
-      capabilities={[
-        { title: "Report Summary", description: "Pending backend report payloads with real content.", status: "pending" },
-        { title: "Evidence Chain", description: "Source links, timestamps, and authorization scope are required before render.", status: "pending" },
-        { title: "AI Extraction", description: "Disabled by default until report APIs are available.", status: "disabled" }
-      ]}
-    >
-      <Card className="p0-card" title="Report Content">
-        <Empty description="No real report content is available yet. Connect backend report services before showing summary, opportunities, risks, or citations." />
+    <div>
+      {/* 页面标题 */}
+      <div className="df-page-header">
+        <Space>
+          <Link to="/research">
+            <Button type="text" icon={<ArrowLeftOutlined />}>返回</Button>
+          </Link>
+          <div>
+            <h1 className="df-page-title">调研报告 #{id || ""}</h1>
+            <p className="df-page-desc">查看市场调研报告</p>
+          </div>
+        </Space>
+      </div>
+
+      {/* 空状态 */}
+      <Card>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "var(--df-space-8) var(--df-space-6)",
+          textAlign: "center"
+        }}>
+          <div style={{ fontSize: 48, color: "var(--df-text-muted)", marginBottom: "var(--df-space-4)" }}>
+            <FileTextOutlined />
+          </div>
+          <h3 style={{ fontSize: "var(--df-text-lg)", color: "var(--df-text)", marginBottom: "var(--df-space-2)" }}>
+            暂无报告内容
+          </h3>
+          <p style={{ color: "var(--df-text-muted)", marginBottom: "var(--df-space-5)", maxWidth: 320 }}>
+            调研报告功能开发中，敬请期待
+          </p>
+          <Space>
+            <Link to="/research">
+              <Button>返回调研中心</Button>
+            </Link>
+          </Space>
+        </div>
       </Card>
-    </P0Scaffold>
+    </div>
   );
 }

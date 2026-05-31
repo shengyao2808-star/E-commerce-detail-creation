@@ -172,7 +172,7 @@ const request = async <T>(
     throw new Error("Session expired");
   }
   if (!response.ok || !payload || payload.code < 200 || payload.code >= 300) {
-    throw new ApiRequestError(payload?.message ?? `Request failed: ${API_BASE}${path}`, path, response.status);
+    throw new ApiRequestError(payload?.message ?? `请求失败: ${API_BASE}${path}`, path, response.status);
   }
   return payload.data;
 };
@@ -207,7 +207,7 @@ const requestPage = async <T>(
     (responseCode !== null && (responseCode < 200 || responseCode >= 300)) ||
     (nestedCode !== null && (nestedCode < 200 || nestedCode >= 300))
   ) {
-    throw new ApiRequestError(message ?? `Request failed: ${API_BASE}${path}`, path, response.status);
+    throw new ApiRequestError(message ?? `请求失败: ${API_BASE}${path}`, path, response.status);
   }
   return page;
 };
@@ -233,7 +233,7 @@ const downloadRequest = async (path: string, fallbackFileName: string): Promise<
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as ApiResult<unknown> | null;
-    throw new ApiRequestError(payload?.message ?? `Request failed: ${API_BASE}${path}`, path, response.status);
+    throw new ApiRequestError(payload?.message ?? `请求失败: ${API_BASE}${path}`, path, response.status);
   }
 
   return {

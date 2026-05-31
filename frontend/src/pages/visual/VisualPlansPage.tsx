@@ -28,12 +28,12 @@ function canCancelJob(status?: string) {
 
 const columns: ColumnsType<VisualPlan> = [
   { title: "ID", dataIndex: "id", width: 80, render: (v) => v ?? "--" },
-  { title: "Detail ID", dataIndex: "productDetailId", width: 100, render: (v) => v ?? "--" },
-  { title: "Name", dataIndex: "planName", render: (v) => v ?? "--" },
-  { title: "Status", dataIndex: "status", width: 100, render: (v) => <Tag color={v === "CONFIRMED" ? "green" : undefined}>{v ?? "--"}</Tag> },
-  { title: "Model", dataIndex: "modelProfileId", width: 100, render: (v) => v ?? "--" },
+  { title: "详情 ID", dataIndex: "productDetailId", width: 100, render: (v) => v ?? "--" },
+  { title: "名称", dataIndex: "planName", render: (v) => v ?? "--" },
+  { title: "状态", dataIndex: "status", width: 100, render: (v) => <Tag color={v === "CONFIRMED" ? "green" : undefined}>{v ?? "--"}</Tag> },
+  { title: "模型", dataIndex: "modelProfileId", width: 100, render: (v) => v ?? "--" },
   { title: "SKC", dataIndex: "skcPolicyId", width: 100, render: (v) => v ?? "--" },
-  { title: "Updated", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
+  { title: "更新时间", dataIndex: "updateTime", width: 180, render: (v) => formatDateTime(v) }
 ];
 
 export default function VisualPlansPage() {
@@ -68,7 +68,7 @@ export default function VisualPlansPage() {
       return api.visualPlans.create(payload);
     },
     onSuccess: async () => {
-      message.success("Visual plan created");
+      message.success("视觉规划已创建");
       form.resetFields();
       await queryClient.invalidateQueries({ queryKey: ["visual", "plans"] });
     }
@@ -77,7 +77,7 @@ export default function VisualPlansPage() {
   const confirmMutation = useMutation({
     mutationFn: (id: number | string) => api.visualPlans.confirm(id),
     onSuccess: async () => {
-      message.success("Visual plan confirmed - now immutable");
+      message.success("视觉规划已确认");
       await queryClient.invalidateQueries({ queryKey: ["visual", "plans"] });
     }
   });
@@ -208,7 +208,7 @@ export default function VisualPlansPage() {
 
   return (
     <Space direction="vertical" size={16} style={{ width: "100%" }}>
-      <Card title="Visual Plans">
+      <Card title="视觉规划">
         <Paragraph>Connected to <Text code>/api/v1/visual-plans</Text>. Draft plans can be edited; confirmed plans are frozen with a snapshot.</Paragraph>
       </Card>
 
@@ -217,12 +217,12 @@ export default function VisualPlansPage() {
           <Space direction="vertical" size={12} style={{ width: "100%" }}>
             <Space wrap>
               <Form.Item name="productDetailId" label="Detail ID" rules={[{ required: true }]}><InputNumber style={{ width: 180 }} /></Form.Item>
-              <Form.Item name="planName" label="Plan Name" style={{ minWidth: 240 }}><Input placeholder="Optional" /></Form.Item>
-              <Form.Item name="categoryCode" label="Category Code" style={{ minWidth: 180 }}><Input placeholder="Optional" /></Form.Item>
+              <Form.Item name="planName" label="规划名称" style={{ minWidth: 240 }}><Input placeholder="可选" /></Form.Item>
+              <Form.Item name="categoryCode" label="类目编码" style={{ minWidth: 180 }}><Input placeholder="可选" /></Form.Item>
             </Space>
             <Space wrap>
-              <Form.Item name="modelProfileId" label="Model Profile ID"><InputNumber style={{ width: 180 }} /></Form.Item>
-              <Form.Item name="skcPolicyId" label="SKC Policy ID"><InputNumber style={{ width: 180 }} /></Form.Item>
+              <Form.Item name="modelProfileId" label="模型档案 ID"><InputNumber style={{ width: 180 }} /></Form.Item>
+              <Form.Item name="skcPolicyId" label="SKC 策略 ID"><InputNumber style={{ width: 180 }} /></Form.Item>
             </Space>
             <Form.Item name="promptContext" label="Plan Context JSON"><TextArea rows={4} placeholder='{"mainImages": 10}' /></Form.Item>
             {createMutation.isError ? <Alert showIcon type="error" message="Failed" description={createMutation.error instanceof Error ? createMutation.error.message : "Error"} /> : null}
@@ -340,13 +340,13 @@ export default function VisualPlansPage() {
                       dataSource={batchJobs}
                       pagination={false}
                       columns={[
-                        { title: "Job", dataIndex: "id", width: 80 },
-                        { title: "Task", dataIndex: "taskName" },
-                        { title: "Slot", dataIndex: "slot", width: 120 },
+                        { title: "任务", dataIndex: "id", width: 80 },
+                        { title: "任务名", dataIndex: "taskName" },
+                        { title: "槽位", dataIndex: "slot", width: 120 },
                         { title: "Ratio", dataIndex: "ratio", width: 90 },
-                        { title: "Status", dataIndex: "status", width: 120, render: (v) => <Tag>{v ?? "--"}</Tag> },
+                        { title: "状态", dataIndex: "status", width: 120, render: (v) => <Tag>{v ?? "--"}</Tag> },
                         { title: "Progress", dataIndex: "progress", width: 90, render: (v) => v ?? "--" },
-                        { title: "Error", dataIndex: "errorMessage", width: 220, render: (v) => v || "--" },
+                        { title: "错误", dataIndex: "errorMessage", width: 220, render: (v) => v || "--" },
                         {
                           title: "Job actions",
                           key: "jobActions",
@@ -377,12 +377,12 @@ export default function VisualPlansPage() {
                     />
                   )}
 
-                  <Card size="small" title="Slot Results">
+                  <Card size="small" title="槽位结果">
                     <Space direction="vertical" size={12} style={{ width: "100%" }}>
                       <Space wrap>
                         <Input
                           allowClear
-                          placeholder="slot filter"
+                          placeholder="槽位筛选"
                           value={selectedBatchSlot}
                           onChange={(event) => setSelectedBatchSlot(event.target.value)}
                           style={{ width: 180 }}
@@ -391,11 +391,11 @@ export default function VisualPlansPage() {
                         <Text type="secondary">Slots: {batchSlots.length > 0 ? batchSlots.join(", ") : "--"}</Text>
                       </Space>
                       {batchResultsQuery.isError ? (
-                        <ErrorState title="Batch results failed" description={batchResultsQuery.error instanceof Error ? batchResultsQuery.error.message : "Error"} onRetry={() => void batchResultsQuery.refetch()} />
+                        <ErrorState title="批量结果加载失败" description={batchResultsQuery.error instanceof Error ? batchResultsQuery.error.message : "Error"} onRetry={() => void batchResultsQuery.refetch()} />
                       ) : batchResultsQuery.isPending ? (
-                        <LoadingState title="Loading batch results" description="GET /api/v1/visual-plans/{id}/batch-results" />
+                        <LoadingState title="加载批量结果" description="GET /api/v1/visual-plans/{id}/batch-results" />
                       ) : batchResultRows.length === 0 ? (
-                        <EmptyState title="No real results for this slot" description="The backend returned no persisted generation_result rows for the current plan/slot." />
+                        <EmptyState title="该槽位暂无结果" description="后端未返回当前规划/槽位的生成结果。" />
                       ) : (
                         <Table
                           size="small"
@@ -403,11 +403,11 @@ export default function VisualPlansPage() {
                           dataSource={batchResultRows}
                           pagination={false}
                           columns={[
-                            { title: "Slot", dataIndex: "slot", width: 120 },
-                            { title: "Job", dataIndex: "id", width: 80, render: (v) => v ?? "--" },
-                            { title: "Task", dataIndex: "taskName", render: (v) => v ?? "--" },
-                            { title: "Status", dataIndex: "status", width: 120, render: (v) => <Tag>{v ?? "--"}</Tag> },
-                            { title: "Result rows", key: "resultRows", width: 110, render: (_: unknown, record) => record.results?.length ?? 0 },
+                            { title: "槽位", dataIndex: "slot", width: 120 },
+                            { title: "任务", dataIndex: "id", width: 80, render: (v) => v ?? "--" },
+                            { title: "任务名", dataIndex: "taskName", render: (v) => v ?? "--" },
+                            { title: "状态", dataIndex: "status", width: 120, render: (v) => <Tag>{v ?? "--"}</Tag> },
+                            { title: "结果行数", key: "resultRows", width: 110, render: (_: unknown, record) => record.results?.length ?? 0 },
                             {
                               title: "Results",
                               key: "results",
@@ -439,7 +439,7 @@ export default function VisualPlansPage() {
                 </Space>
               </Card>
             ) : (
-              <Alert showIcon type="info" message="Batch dispatch requires a confirmed visual plan." />
+              <Alert showIcon type="info" message="批量派发需要已确认的视觉规划。" />
             )}
           </Space>
         )}

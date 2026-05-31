@@ -3,7 +3,7 @@ import {
   AppstoreOutlined, AuditOutlined, DollarOutlined, ExportOutlined,
   FileImageOutlined, FileSearchOutlined, FileTextOutlined, FolderOpenOutlined,
   ProductOutlined, RadarChartOutlined, ScissorOutlined, SettingOutlined,
-  TagsOutlined, ToolOutlined
+  TagsOutlined, ToolOutlined, TeamOutlined, MedicineBoxOutlined
 } from "@ant-design/icons";
 import { useLang } from "../i18n";
 
@@ -14,36 +14,35 @@ const navGroups: NavGroup[] = [
   {
     labelKey: "nav.overview",
     items: [
-      { key: "/", labelKey: "nav.dashboard", icon: <AppstoreOutlined /> },
-      { key: "/research", labelKey: "nav.research", icon: <RadarChartOutlined />, matchPrefix: "/research" }
+      { key: "/", labelKey: "nav.dashboard", icon: <AppstoreOutlined /> }
     ]
   },
   {
     labelKey: "nav.production",
     items: [
+      { key: "/research", labelKey: "nav.research", icon: <RadarChartOutlined />, matchPrefix: "/research" },
       { key: "/materials", labelKey: "nav.materials", icon: <ProductOutlined />, matchPrefix: "/materials" },
       { key: "/generate", labelKey: "nav.generate", icon: <FileImageOutlined />, matchPrefix: "/generate" },
       { key: "/assets", labelKey: "nav.assets", icon: <FolderOpenOutlined /> },
-      { key: "/results", labelKey: "nav.results", icon: <FileSearchOutlined /> },
-      { key: "/details/1", labelKey: "nav.detail", icon: <FileTextOutlined />, matchPrefix: "/details" },
-      { key: "/audit", labelKey: "nav.audit", icon: <AuditOutlined /> },
-      { key: "/exports", labelKey: "nav.exports", icon: <ExportOutlined /> },
-      { key: "/post-process", labelKey: "nav.postprocess", icon: <ScissorOutlined /> }
+      { key: "/visual/plans", labelKey: "nav.plans", icon: <TagsOutlined />, matchPrefix: "/visual/plans" },
+      { key: "/visual/prompt-workbench", labelKey: "nav.promptlab", icon: <TagsOutlined />, matchPrefix: "/visual/prompt" },
+      { key: "/details/1", labelKey: "nav.detail", icon: <FileTextOutlined />, matchPrefix: "/details" }
     ]
   },
   {
-    labelKey: "nav.visual",
+    labelKey: "nav.contentMgmt",
     items: [
-      { key: "/visual/prompt-workbench", labelKey: "nav.promptlab", icon: <TagsOutlined />, matchPrefix: "/visual/prompt" },
-      { key: "/visual/prompt-templates", labelKey: "nav.templates", icon: <TagsOutlined /> },
-      { key: "/visual/plans", labelKey: "nav.plans", icon: <TagsOutlined />, matchPrefix: "/visual/plans" }
+      { key: "/audit", labelKey: "nav.audit", icon: <AuditOutlined /> },
+      { key: "/exports", labelKey: "nav.exports", icon: <ExportOutlined /> },
+      { key: "/post-process", labelKey: "nav.postprocess", icon: <ScissorOutlined /> },
+      { key: "/cost", labelKey: "nav.cost", icon: <DollarOutlined /> }
     ]
   },
   {
     labelKey: "nav.system",
     items: [
-      { key: "/cost", labelKey: "nav.cost", icon: <DollarOutlined /> },
-      { key: "/system/diagnostics", labelKey: "nav.diagnostics", icon: <SettingOutlined />, matchPrefix: "/system" },
+      { key: "/system/team", labelKey: "nav.team", icon: <TeamOutlined /> },
+      { key: "/system/diagnostics", labelKey: "nav.diagnostics", icon: <MedicineBoxOutlined /> },
       { key: "/tools", labelKey: "nav.tools", icon: <ToolOutlined />, matchPrefix: "/tools" }
     ]
   }

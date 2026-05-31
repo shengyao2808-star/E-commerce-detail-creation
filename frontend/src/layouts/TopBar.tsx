@@ -1,43 +1,44 @@
-import { Button, Space } from "antd";
-import { GlobalOutlined, PlusOutlined, SearchOutlined, SettingOutlined, UserOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { Button, Input, Space } from "antd";
+import { BellOutlined, GlobalOutlined, PlusOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useLang } from "../i18n";
-import { GlobalSearch } from "../components/GlobalSearch";
+import iconLogo from "../assets/icon-logo.png";
+import textLogo from "../assets/text-logo.png";
 
 export const TopBar = () => {
   const navigate = useNavigate();
   const { lang, toggle, t } = useLang();
-  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <>
-      <header className="df-topbar">
-        <div className="df-topbar-brand">
-          <div className="df-topbar-brand-icon">D</div>
-          <span>DetailFlow</span>
-        </div>
-        <div className="df-topbar-actions">
-          <Button type="text" icon={<SearchOutlined />} size="small" onClick={() => setSearchOpen(true)}>
-            {t("topbar.search")}
-          </Button>
-          <Button type="primary" icon={<PlusOutlined />} size="small" onClick={() => navigate("/materials/new")}>
-            {t("topbar.newProject")}
-          </Button>
-          <Button type="text" icon={<SettingOutlined />} size="small" onClick={() => navigate("/system/diagnostics")} />
-          <Button type="text" icon={<UserOutlined />} size="small" />
-          <Button
-            type="text"
-            icon={<GlobalOutlined />}
-            size="small"
-            onClick={toggle}
-            title={lang === "zh" ? "Switch to English" : "åˆ‡æ¢åˆ°ä¸­æ–‡"}
-          >
-            {lang === "zh" ? "EN" : "ä¸­"}
-          </Button>
-        </div>
-      </header>
-      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
-    </>
+    <header className="df-topbar">
+      <div className="df-topbar-brand" onClick={() => navigate("/dashboard")} style={{ cursor: "pointer" }}>
+        <img src={iconLogo} alt="Logo" style={{ width: 36, height: 36, borderRadius: 8 }} />
+        <img src={textLogo} alt="DetailFlow" style={{ height: 28, marginLeft: 4 }} />
+      </div>
+      <div className="df-topbar-center">
+        <Input
+          className="df-topbar-search"
+          placeholder={t("topbar.search")}
+          prefix={<SearchOutlined style={{ color: "var(--df-text-muted)" }} />}
+          allowClear
+          style={{ borderRadius: "var(--df-radius-lg)", background: "var(--df-bg)" }}
+        />
+      </div>
+      <div className="df-topbar-actions">
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/materials/new")}>
+          {t("topbar.newProject")}
+        </Button>
+        <Button type="text" icon={<BellOutlined />} />
+        <Button type="text" icon={<UserOutlined />} />
+        <Button
+          type="text"
+          icon={<GlobalOutlined />}
+          onClick={toggle}
+          title={lang === "zh" ? "Switch to English" : "ÇÐ»»µ½ÖÐÎÄ"}
+        >
+          {lang === "zh" ? "EN" : "ÖÐ"}
+        </Button>
+      </div>
+    </header>
   );
 };

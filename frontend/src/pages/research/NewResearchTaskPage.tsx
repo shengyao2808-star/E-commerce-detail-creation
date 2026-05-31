@@ -1,10 +1,9 @@
-import { Alert, Button, Card, Form, Input, Space, message } from "antd";
+import { Button, Card, Form, Input, Space, message } from "antd";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ErrorState } from "../../components/common";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { api } from "../../services/api";
 import type { ResearchTask } from "../../services/types";
-import { P0Scaffold } from "../p0/P0Scaffold";
 
 const { TextArea } = Input;
 
@@ -21,12 +20,9 @@ export default function NewResearchTaskPage() {
   const navigate = useNavigate();
   const [form] = Form.useForm<TaskFormValues>();
   const [submitting, setSubmitting] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
 
   const onSubmit = async (values: TaskFormValues) => {
     setSubmitting(true);
-    setCreateError(null);
-
     try {
       const payload: ResearchTask = {
         taskName: values.taskName.trim(),
@@ -39,67 +35,79 @@ export default function NewResearchTaskPage() {
           deliveryRequirements: values.deliveryRequirements?.trim() || ""
         }
       };
-
       const taskId = await api.research.create(payload);
-      message.success("Research task created");
+      message.success("调研任务已创建");
       navigate(`/research/tasks/${taskId}`);
     } catch (requestError) {
-      setCreateError(requestError instanceof Error ? requestError.message : "Failed to create research task");
+      message.error(requestError instanceof Error ? requestError.message : "创建调研任务失败");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <P0Scaffold
-      eyebrow="Research"
-      title="New Research Task"
-      description="Create a persisted task through POST /api/v1/research/tasks with real backend responses only."
-      apiNotice={false}
-      toolNotice={false}
-      capabilities={[
-        { title: "Task persistence", description: "Creates a real research task record.", status: "available" },
-        { title: "Honest failure state", description: "Shows backend error when create fails.", status: "available" },
-        { title: "No fake AI", description: "Stores only user-provided task input.", status: "available" }
-      ]}
-    >
-      <Card className="p0-card" title="Task Information">
-        {createError ? <ErrorState title="Failed to create task" description={createError} /> : null}
-        <Form form={form} layout="vertical" onFinish={(values) => void onSubmit(values)}>
-          <Alert
-            showIcon
-            type="info"
-            style={{ marginBottom: 16 }}
-            message="Backend endpoint: POST /api/v1/research/tasks"
-          />
-          <Form.Item label="Task Name" name="taskName" rules={[{ required: true, message: "Task name is required" }]}>
-            <Input placeholder="Summer campaign competitor scan" maxLength={120} />
+    <div>
+      {/* 页面标题 */}
+      <div className="df-page-header">
+        <Space>
+          <Link to="/research">
+            <Button type="text" icon={<ArrowLeftOutlined />}>返回</Button>
+          </Link>
+          <div>
+            <h1 className="df-page-title">新建调研任务</h1>
+            <p className="df-page-desc">创建市场调研任务，分析竞品和用户需求</p>
+          </div>
+        </Space>
+      </div>
+
+      {/* 表单 */}
+      <Card>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={(values) => void onSubmit(values)}
+          style={{ maxWidth: 640 }}
+        >
+          <Form.Item
+            label="任务名称"
+            name="taskName"
+            rules={[{ required: true, message: "请输入任务名称" }]}
+          >
+            <Input placeholder="夏季活动竞品扫描" maxLength={120} />
           </Form.Item>
-          <Form.Item label="Category" name="category">
-            <Input placeholder="Home decor / kitchen tools / fashion accessories" maxLength={120} />
+
+          <Form.Item label="类目" name="category">
+            <Input placeholder="家居装饰 / 厨房工具 / 时尚配饰" maxLength={120} />
           </Form.Item>
-          <Form.Item label="Owner" name="owner">
-            <Input placeholder="Operator name or owner ID" maxLength={80} />
+
+          <Form.Item label="负责人" name="owner">
+            <Input placeholder="负责人姓名" maxLength={80} />
           </Form.Item>
-          <Form.Item label="Authorization Source" name="authorizationSource">
-            <TextArea rows={3} placeholder="Client authorization URL, public source list, or import note." />
+
+          <Form.Item label="授权来源" name="authorizationSource">
+            <TextArea rows={3} placeholder="客户授权 URL、公开数据源列表或导入说明" />
           </Form.Item>
-          <Form.Item label="Research Goals" name="goals">
-            <TextArea rows={4} placeholder="Pricing bands, visual trends, selling points, detail-page structure." />
+
+          <Form.Item label="调研目标" name="goals">
+            <TextArea rows={4} placeholder="价格区间、视觉趋势、卖点分析、详情页结构" />
           </Form.Item>
-          <Form.Item label="Delivery Requirements" name="deliveryRequirements">
-            <TextArea rows={4} placeholder="Expected report format and acceptance criteria." />
+
+          <Form.Item label="交付要求" name="deliveryRequirements">
+            <TextArea rows={4} placeholder="期望的报告格式和验收标准" />
           </Form.Item>
-          <Space wrap>
-            <Button type="primary" htmlType="submit" loading={submitting}>
-              Create Task
-            </Button>
-            <Button onClick={() => form.resetFields()} disabled={submitting}>
-              Reset
-            </Button>
-          </Space>
+
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={submitting}>
+                创建任务
+              </Button>
+              <Button onClick={() => form.resetFields()} disabled={submitting}>
+                重置
+              </Button>
+            </Space>
+          </Form.Item>
         </Form>
       </Card>
-    </P0Scaffold>
+    </div>
   );
 }

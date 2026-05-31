@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Button,
@@ -18,6 +18,7 @@ import {
 } from "antd";
 import { ReloadOutlined, StopOutlined, PlusOutlined } from "@ant-design/icons";
 import { api } from "../../services/api";
+import { useLang } from "../../i18n";
 import type {
   PostProcessTask,
   PostProcessTaskCreateRequest,
@@ -35,22 +36,22 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const TOOL_OPTIONS = [
-  { value: "real-esrgan", label: "Real-ESRGAN (upscale)" },
-  { value: "iopaint", label: "IOPaint (inpaint/cleanup)" },
-  { value: "grounded-sam", label: "Grounded-SAM (segment)" },
-  { value: "imagemagick", label: "ImageMagick (resize/crop/convert)" }
+  { value: "real-esrgan", label: "Real-ESRGAN (超分)" },
+  { value: "iopaint", label: "IOPaint (修复/清理)" },
+  { value: "grounded-sam", label: "Grounded-SAM (分割)" },
+  { value: "imagemagick", label: "ImageMagick (缩放/裁剪/转换)" }
 ];
 
 const OPERATION_OPTIONS = [
-  { value: "upscale", label: "upscale" },
-  { value: "inpaint", label: "inpaint" },
-  { value: "cleanup-background", label: "cleanup-background" },
-  { value: "remove-object", label: "remove-object" },
-  { value: "segment", label: "segment" },
-  { value: "crop", label: "crop" },
-  { value: "resize", label: "resize" },
-  { value: "convert", label: "convert" },
-  { value: "restore-face", label: "restore-face" }
+  { value: "upscale", label: "超分" },
+  { value: "inpaint", label: "修复" },
+  { value: "cleanup-background", label: "清理背景" },
+  { value: "remove-object", label: "移除对象" },
+  { value: "segment", label: "分割" },
+  { value: "crop", label: "裁剪" },
+  { value: "resize", label: "缩放" },
+  { value: "convert", label: "转换" },
+  { value: "restore-face", label: "人脸修复" }
 ];
 
 function formatBytes(bytes?: number): string {
@@ -61,6 +62,7 @@ function formatBytes(bytes?: number): string {
 }
 
 export default function PostProcessTasksPage() {
+  const { t } = useLang();
   const [tasks, setTasks] = useState<PostProcessTask[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -90,7 +92,7 @@ export default function PostProcessTasksPage() {
       setTasks(pageData.data ?? []);
       setTotal(pageData.total ?? 0);
     } catch (err) {
-      messageApi.error("Failed to load post-process tasks");
+      messageApi.error(t("postprocess.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -103,20 +105,20 @@ export default function PostProcessTasksPage() {
   const handleRetry = async (id: number | string) => {
     try {
       await api.postProcessTasks.retry(id);
-      messageApi.success("Task retry submitted");
+      messageApi.success(t("postprocess.retrySuccess"));
       fetchTasks();
     } catch {
-      messageApi.error("Retry failed");
+      messageApi.error(t("postprocess.retryFailed"));
     }
   };
 
   const handleCancel = async (id: number | string) => {
     try {
       await api.postProcessTasks.cancel(id);
-      messageApi.success("Task canceled");
+      messageApi.success(t("postprocess.cancelSuccess"));
       fetchTasks();
     } catch {
-      messageApi.error("Cancel failed");
+      messageApi.error(t("postprocess.cancelFailed"));
     }
   };
 
@@ -134,12 +136,12 @@ export default function PostProcessTasksPage() {
         outputRatio: values.outputRatio || undefined
       };
       await api.postProcessTasks.create(payload);
-      messageApi.success("Post-process task created");
+      messageApi.success(t("postprocess.createSuccess"));
       setCreateOpen(false);
       form.resetFields();
       fetchTasks();
     } catch {
-      messageApi.error("Create failed");
+      messageApi.error(t("postprocess.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -147,25 +149,25 @@ export default function PostProcessTasksPage() {
 
   const columns = [
     {
-      title: "ID",
+      title: t("postprocess.taskId"),
       dataIndex: "id",
       key: "id",
       width: 80
     },
     {
-      title: "Tool",
+      title: t("postprocess.tool"),
       dataIndex: "toolCode",
       key: "toolCode",
       width: 140
     },
     {
-      title: "Operation",
+      title: t("postprocess.operation"),
       dataIndex: "operation",
       key: "operation",
       width: 160
     },
     {
-      title: "Status",
+      title: t("postprocess.status"),
       dataIndex: "status",
       key: "status",
       width: 110,
@@ -181,49 +183,33 @@ export default function PostProcessTasksPage() {
       render: (v: number) => `${v ?? 0}%`
     },
     {
-      title: "Input",
-      key: "input",
-      width: 160,
-      render: (_: unknown, record: PostProcessTask) => {
-        const w = record.inputWidth;
-        const h = record.inputHeight;
-        if (w && h) return `${w}x${h}`;
-        return formatBytes(record.inputFileSize);
-      }
+      title: t("postprocess.input"),
+      dataIndex: "sourceImagePath",
+      key: "sourceImagePath",
+      ellipsis: true
     },
     {
-      title: "Output",
-      key: "output",
-      width: 160,
-      render: (_: unknown, record: PostProcessTask) => {
-        const w = record.outputWidth;
-        const h = record.outputHeight;
-        if (w && h) return `${w}x${h}`;
-        return formatBytes(record.outputFileSize);
-      }
+      title: t("postprocess.output"),
+      dataIndex: "outputPath",
+      key: "outputPath",
+      ellipsis: true
     },
     {
-      title: "Error",
-      dataIndex: "errorMessage",
-      key: "errorMessage",
-      ellipsis: true,
-      render: (msg: string) =>
-        msg ? (
-          <Typography.Text type="danger" ellipsis={{ tooltip: msg }}>
-            {msg}
-          </Typography.Text>
-        ) : (
-          "-"
-        )
+      title: t("postprocess.size"),
+      dataIndex: "outputFileSize",
+      key: "outputFileSize",
+      width: 100,
+      render: (v: number) => formatBytes(v)
     },
     {
-      title: "Created",
-      dataIndex: "createTime",
-      key: "createTime",
-      width: 170
+      title: t("postprocess.time"),
+      dataIndex: "durationMs",
+      key: "durationMs",
+      width: 100,
+      render: (v: number) => (v ? `${(v / 1000).toFixed(1)}s` : "-")
     },
     {
-      title: "Actions",
+      title: t("postprocess.actions"),
       key: "actions",
       width: 120,
       render: (_: unknown, record: PostProcessTask) => {
@@ -243,7 +229,7 @@ export default function PostProcessTasksPage() {
                 icon={<ReloadOutlined />}
                 onClick={() => handleRetry(record.id!)}
               >
-                Retry
+                {t("postprocess.retry")}
               </Button>
             )}
             {canCancel && (
@@ -253,10 +239,10 @@ export default function PostProcessTasksPage() {
                 icon={<StopOutlined />}
                 onClick={() => handleCancel(record.id!)}
               >
-                Cancel
+                {t("postprocess.cancel")}
               </Button>
             )}
-            {terminal && !canRetry && <Tag>Done</Tag>}
+            {terminal && !canRetry && <Tag>{t("status.done")}</Tag>}
           </Space>
         );
       }
@@ -269,20 +255,20 @@ export default function PostProcessTasksPage() {
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
           <Title level={4} style={{ margin: 0 }}>
-            Post-Process Tasks
+            {t("postprocess.title")}
           </Title>
         </Col>
         <Col>
           <Space>
             <Button icon={<ReloadOutlined />} onClick={fetchTasks}>
-              Refresh
+              {t("postprocess.refresh")}
             </Button>
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setCreateOpen(true)}
             >
-              New Task
+              {t("postprocess.create")}
             </Button>
           </Space>
         </Col>
@@ -292,21 +278,21 @@ export default function PostProcessTasksPage() {
         <Space wrap>
           <Select
             allowClear
-            placeholder="Filter by status"
+            placeholder={t("postprocess.filter.status")}
             style={{ width: 160 }}
             value={statusFilter}
             onChange={setStatusFilter}
             options={[
-              { value: "PENDING", label: "Pending" },
-              { value: "RUNNING", label: "Running" },
-              { value: "SUCCEEDED", label: "Succeeded" },
-              { value: "FAILED", label: "Failed" },
-              { value: "CANCELED", label: "Canceled" }
+              { value: "PENDING", label: t("status.pending") },
+              { value: "RUNNING", label: t("status.running") },
+              { value: "SUCCEEDED", label: t("status.done") },
+              { value: "FAILED", label: t("common.failed") },
+              { value: "CANCELED", label: t("common.canceled") }
             ]}
           />
           <Select
             allowClear
-            placeholder="Filter by tool"
+            placeholder={t("postprocess.filter.tool")}
             style={{ width: 200 }}
             value={toolFilter}
             onChange={setToolFilter}
@@ -335,7 +321,7 @@ export default function PostProcessTasksPage() {
       />
 
       <Modal
-        title="Create Post-Process Task"
+        title={t("postprocess.createTitle")}
         open={createOpen}
         onCancel={() => setCreateOpen(false)}
         onOk={handleCreate}
@@ -345,38 +331,38 @@ export default function PostProcessTasksPage() {
         <Form form={form} layout="vertical">
           <Form.Item
             name="toolCode"
-            label="Tool"
-            rules={[{ required: true, message: "Select a tool" }]}
+            label={t("postprocess.form.tool")}
+            rules={[{ required: true, message: t("common.required") }]}
           >
-            <Select options={TOOL_OPTIONS} placeholder="Select tool" />
+            <Select options={TOOL_OPTIONS} placeholder={t("postprocess.form.tool")} />
           </Form.Item>
           <Form.Item
             name="operation"
-            label="Operation"
-            rules={[{ required: true, message: "Select an operation" }]}
+            label={t("postprocess.form.operation")}
+            rules={[{ required: true, message: t("common.required") }]}
           >
-            <Select options={OPERATION_OPTIONS} placeholder="Select operation" />
+            <Select options={OPERATION_OPTIONS} placeholder={t("postprocess.form.operation")} />
           </Form.Item>
-          <Form.Item name="sourceImagePath" label="Source Image Path">
-            <Input placeholder="e.g. exports/product.png" />
+          <Form.Item name="sourceImagePath" label={t("postprocess.input")}>
+            <Input placeholder="exports/product.png" />
           </Form.Item>
-          <Form.Item name="sourceGenerationResultId" label="Source Generation Result ID">
-            <InputNumber style={{ width: "100%" }} placeholder="Optional" />
+          <Form.Item name="sourceGenerationResultId" label={t("postprocess.form.assetId")}>
+            <InputNumber style={{ width: "100%" }} placeholder={t("common.optional")} />
           </Form.Item>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="targetWidth" label="Target Width">
+              <Form.Item name="targetWidth" label="宽度">
                 <InputNumber min={1} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="targetHeight" label="Target Height">
+              <Form.Item name="targetHeight" label="高度">
                 <InputNumber min={1} style={{ width: "100%" }} />
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="outputRatio" label="Output Ratio">
-                <Input placeholder="e.g. 1:1" />
+              <Form.Item name="outputRatio" label="输出比例">
+                <Input placeholder="1:1" />
               </Form.Item>
             </Col>
           </Row>
