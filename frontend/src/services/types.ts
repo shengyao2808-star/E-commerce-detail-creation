@@ -20,6 +20,55 @@ export type PageQuery = {
   keyword?: string;
 };
 
+export type AgentRun = {
+  id?: number | string;
+  taskType?: string;
+  agentCode?: string;
+  callType?: string;
+  status?: string;
+  progress?: number;
+  projectId?: number | string;
+  productMaterialId?: number | string;
+  productDetailId?: number | string;
+  visualPlanId?: number | string;
+  sourceType?: string;
+  sourceId?: number | string;
+  toolCode?: string;
+  operation?: string;
+  requestSummary?: Record<string, unknown>;
+  responseSummary?: Record<string, unknown>;
+  errorMessage?: string;
+  durationMs?: number;
+  startedTime?: string;
+  finishedTime?: string;
+  createTime?: string;
+  updateTime?: string;
+};
+
+export type AgentRunEvent = {
+  id?: number | string;
+  agentRunId?: number | string;
+  eventType?: string;
+  status?: string;
+  progress?: number;
+  message?: string;
+  data?: Record<string, unknown>;
+  createTime?: string;
+};
+
+export type AgentRunListQuery = PageQuery & {
+  taskType?: string;
+  agentCode?: string;
+  status?: string;
+  callType?: string;
+  projectId?: number | string;
+  productMaterialId?: number | string;
+  productDetailId?: number | string;
+  visualPlanId?: number | string;
+  sourceType?: string;
+  sourceId?: number | string;
+};
+
 export type ProductMaterial = {
   id: number;
   brandId?: number;
@@ -47,6 +96,89 @@ export type ProductMaterial = {
 };
 
 export type ProductMaterialUploadRequest = FormData | Record<string, unknown>;
+
+export type ProductLinkPreviewRequest = {
+  url: string;
+};
+
+export type ProductLinkPreview = {
+  originalUrl?: string;
+  resolvedUrl?: string;
+  host?: string;
+  platform?: string;
+  productName?: string;
+  category?: string;
+  rawCategoryPath?: string;
+  brandName?: string;
+  pageTitle?: string;
+  httpStatus?: number;
+  fetched?: boolean;
+  loginRequired?: boolean;
+  source?: string;
+  message?: string;
+};
+
+export type ProductMaterialUploadedFile = {
+  originalName?: string;
+  storedPath?: string;
+  fileType?: string;
+  extension?: string;
+  fileSize?: number;
+  status?: string;
+  message?: string;
+};
+
+export type MaterialParseTask = {
+  id?: number | string;
+  materialId?: number | string;
+  originalName?: string;
+  storedPath?: string;
+  fileType?: string;
+  extension?: string;
+  fileSize?: number;
+  ownerUsername?: string;
+  parseType?: string;
+  requiredPluginCode?: string;
+  agentRunId?: number | string;
+  status?: string;
+  progress?: number;
+  userMessage?: string;
+  resultJson?: string;
+  errorMessage?: string;
+  startedTime?: string;
+  finishedTime?: string;
+  createTime?: string;
+  updateTime?: string;
+};
+
+export type MaterialParseTaskListQuery = PageQuery & {
+  materialId?: number | string;
+  status?: string;
+  parseType?: string;
+};
+
+export type MaterialParseTaskStatusRequest = {
+  status?: string;
+  progress?: number;
+  userMessage?: string;
+  resultJson?: string;
+  errorMessage?: string;
+};
+
+export type ProductMaterialFileUploadResponse = {
+  materialId?: number | string;
+  status?: string;
+  message?: string;
+  uploadedCount?: number;
+  failedCount?: number;
+  totalSize?: number;
+  images?: string[];
+  documents?: string[];
+  videos?: string[];
+  uploadedFiles?: ProductMaterialUploadedFile[];
+  failedFiles?: ProductMaterialUploadedFile[];
+  parseTasks?: MaterialParseTask[];
+};
 
 export type ProductMaterialListQuery = PageQuery;
 
@@ -93,11 +225,24 @@ export type DetailGenerateRequest = Partial<ProductDetail> & {
   title?: string;
 };
 
+export type ProductDetailGenerateResponse = {
+  materialId?: number | string;
+  detailId?: number | string;
+  agentRunId: number | string;
+  status?: string;
+  nextRoute: string;
+};
+
 export type ProductDetailListQuery = PageQuery & {
   status?: number | string;
 };
 
 export type ProductDetailUpdateRequest = Partial<Omit<ProductDetail, "id" | "createTime" | "updateTime">>;
+
+export type ProductDetailAuditRequest = {
+  approved: boolean;
+  comment?: string;
+};
 
 export type ProductContentTask = {
   id?: number | string;
@@ -167,6 +312,14 @@ export type ResearchTask = {
 
 export type ResearchTaskListQuery = PageQuery & {
   status?: string;
+  reportedOnly?: boolean;
+};
+
+export type ResearchTaskSummary = {
+  total?: number;
+  completed?: number;
+  running?: number;
+  pending?: number;
 };
 
 export type ResearchTaskStatusRequest = {
@@ -441,7 +594,7 @@ export type AuditActionRequest = {
   auditor?: string;
 };
 
-export type ExportFormat = "WORD" | "MARKDOWN" | "JSON" | "HTML" | "TXT" | "PDF";
+export type ExportFormat = "PNG" | "JPG" | "JSON" | "HTML" | "ZIP" | "WORD" | "MARKDOWN" | "TXT" | "PDF";
 
 export type ExportRecord = {
   id: number;
@@ -457,19 +610,28 @@ export type ExportRecord = {
   errorMessage?: string;
   exporter?: string;
   exportTime?: string;
+  detailCompositionId?: number;
+  manifestJson?: string;
+  manifestConsistent?: boolean;
+  qaCheckId?: number;
+  qaStatus?: string;
   createTime?: string;
+  updateTime?: string;
 };
 
 export type ExportCreateRequest = {
   productDetailId: number;
   exportFormat: ExportFormat | string;
   exporter: string;
+  detailCompositionId?: number;
+  visualPlanId?: number | string;
 };
 
 export type ExportListQuery = PageQuery & {
   status?: number | string;
   exportStatus?: number | string;
   exporter?: string;
+  productDetailId?: number | string;
 };
 
 export type ToolAdapterInfo = {
@@ -486,20 +648,6 @@ export type ToolAdapterInfo = {
   operations?: string[];
   configured: boolean;
   status?: string;
-};
-
-export type ToolInvokeRequest = {
-  operation?: string;
-  payload?: Record<string, unknown>;
-  headers?: Record<string, string>;
-};
-
-export type ToolInvokeResponse = {
-  toolCode: string;
-  operation: string;
-  statusCode: number;
-  body?: unknown;
-  rawBody?: string;
 };
 
 export type CategoryVisualPolicy = {
@@ -804,6 +952,8 @@ export type EnvironmentDiagnostic = {
     model?: string;
     enabled?: boolean;
     hasApiKey?: boolean;
+    availableModels?: string[];
+    configuredModelAvailable?: boolean;
     missingFields?: string[];
   };
   tools?: Array<{
@@ -846,15 +996,21 @@ export type PublishCheck = {
   overrideOperator?: string;
   overrideTime?: string;
   createTime?: string;
+  updateTime?: string;
 };
 
 export type PublishCheckSummary = {
   productDetailId?: number;
+  publishable?: boolean;
   totalChecks?: number;
   passedChecks?: number;
+  failedChecks?: number;
+  hardFailedChecks?: number;
+  softFailedChecks?: number;
   warningChecks?: number;
   errorChecks?: number;
   overriddenChecks?: number;
+  items?: PublishCheck[];
   canPublish?: boolean;
   checks?: PublishCheck[];
 };
@@ -940,4 +1096,51 @@ export type PromptTemplateQuery = {
   style?: string;
   source?: string;
   keyword?: string;
+};
+
+export type BrandTemplate = {
+  id?: number;
+  brandId?: number;
+  brandName?: string;
+  templateName?: string;
+  templateType?: string;
+  templateContent?: string;
+  styleTags?: string;
+  styleDescription?: string;
+  applicableCategories?: string;
+  enabled?: boolean;
+  usageCount?: number;
+  creator?: string;
+  updater?: string;
+  createTime?: string;
+  updateTime?: string;
+};
+
+export type BrandTemplateCreateRequest = {
+  brandId?: number;
+  brandName?: string;
+  templateName: string;
+  templateType?: string;
+  templateContent?: string;
+  styleTags?: string;
+  styleDescription?: string;
+  applicableCategories?: string;
+  enabled?: boolean;
+  creator?: string;
+  updater?: string;
+};
+
+export type BrandTemplateQuery = PageQuery & {
+  brandId?: number | string;
+  brandName?: string;
+  templateType?: string;
+  enabled?: boolean;
+  keyword?: string;
+};
+
+export type BrandTemplateSummary = {
+  total: number;
+  enabled: number;
+  disabled: number;
+  usageCount: number;
 };
