@@ -1,3 +1,28 @@
+## 2026-06-01 20:34:06 +08:00 | Project content inspection | Branch master | HEAD f723868
+- Action: Inspected project contents without changing source code.
+- Completed:
+  - Read `AGENTS.md`, `HANDOFF.md`, and `HANDOFF_LOG.md` before inspection.
+  - Scanned repository structure, build files, backend controllers, frontend routes/API clients, config files, docs, and known TODO/unimplemented markers.
+  - Confirmed stack: Java 21 + Spring Boot 3.2 + MyBatis-Plus backend; React 18 + TypeScript + Vite + Ant Design frontend.
+  - Confirmed current worktree was clean before handoff updates (`git status --short --branch` showed `master...origin/master`).
+  - Confirmed current counts excluding generated/dependency directories: 269 Java files, 63 TSX files, 13 TS files, 32 Markdown files, 6 SQL files.
+  - Confirmed backend surface includes 27 controller files and frontend `pages` contains 39 page files.
+  - Per AGENTS.md, performed a limited GitHub/web scan for related ecommerce AI/product-detail implementations; no implementation decision was needed in this read-only inspection.
+- Findings:
+  - `frontend/src/layouts/SideNav.tsx:29` and `frontend/src/components/GlobalSearch.tsx:21` still hardcode `/details/1`.
+  - `src/main/resources/application.yml:15-16` still contains default `root/root` database credentials, while `application-dev.yml` uses env-var overrides.
+  - `pom.xml` and `frontend/package.json` still report version `5.0.0`, while README/USAGE_GUIDE/HANDOFF docs describe v6.0 progress.
+  - `P0Scaffold` remains as a component file only; no active frontend imports were found under `frontend/src`.
+- Exact next step:
+  - Continue Phase 2 code governance by fixing hardcoded detail routes and normalizing database credential defaults/version metadata, then run `npm test` for JS/TS changes and Maven tests if backend/config behavior changes.
+- Blockers: None.
+- Files touched:
+  - `HANDOFF.md`
+  - `HANDOFF_LOG.md`
+- Verification:
+  - Read-only inspection commands: `rg --files`, `git status --short --branch`, `rg` over controllers/routes/API clients/TODO markers, config reads.
+  - Tests were not run because no JavaScript/TypeScript/Java source files were modified.
+
 ## 2026-05-29 21:30:00 +08:00 | 全版本使用说明文档 | Branch master | HEAD xxxxxxx
 - Action: Created comprehensive usage guide document.
 - Completed:

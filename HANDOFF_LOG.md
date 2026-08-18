@@ -694,3 +694,21 @@ pm test pipeline.
 - Frontend PromptTemplatePage with card grid, filters, detail drawer, create/edit modal
 - 7 unit tests passing, TypeScript compiles clean
 - Commit: fb66e16
+
+## 2026-06-01 20:34:06 +08:00 | Project content inspection | Branch master | HEAD f723868
+- Action: Inspected project contents without changing source code.
+- Completed:
+  - Read `AGENTS.md`, `HANDOFF.md`, and `HANDOFF_LOG.md`.
+  - Scanned repository structure, build files, backend controller mappings, frontend routes/API clients, config files, docs, and known TODO/unimplemented markers.
+  - Confirmed stack and file/module counts excluding generated/dependency directories.
+  - Per AGENTS.md, performed a limited GitHub/web scan for related ecommerce AI/product-detail implementations; no implementation decision was needed.
+- Findings:
+  - `/details/1` remains hardcoded in `frontend/src/layouts/SideNav.tsx:29` and `frontend/src/components/GlobalSearch.tsx:21`.
+  - `src/main/resources/application.yml:15-16` still contains default `root/root` database credentials.
+  - Runtime/build versions remain `5.0.0` in `pom.xml` and `frontend/package.json`, while docs describe v6.0 progress.
+  - `P0Scaffold` is present as an unused component file only.
+- Verification:
+  - Read-only inspection commands completed.
+  - Tests were not run because no JavaScript/TypeScript/Java source files were modified.
+- Next:
+  - Continue Phase 2 code governance by fixing hardcoded detail routes and normalizing database credential defaults/version metadata.
