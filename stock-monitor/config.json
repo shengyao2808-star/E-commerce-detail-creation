@@ -1,0 +1,27 @@
+{
+  "stocks": [
+    {
+      "ticker": "688519.SH",
+      "name": "南亚新材",
+      "upper_trigger": 324.0,
+      "lower_trigger": 305.0
+    },
+    {
+      "ticker": "603039.SH",
+      "name": "泛微网络",
+      "upper_trigger": 49.10,
+      "lower_trigger": 42.60
+    }
+  ],
+  "trading_hours": {
+    "morning_start": "09:30",
+    "morning_end": "11:30",
+    "afternoon_start": "13:00",
+    "afternoon_end": "15:00"
+  },
+  "wxpusher": {
+    "app_token": "AT_QSi6TrInTByfOOJKWlgUm04NIiT3JYDd",
+    "uids": ["UID_gACKre5RSJrToCSL9qzrjrQrHXJe"],
+    "content_type": 1
+  }
+}
