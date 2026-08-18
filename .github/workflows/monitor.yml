@@ -1,0 +1,30 @@
+name: Stock Monitor Trigger
+
+on:
+  schedule:
+    - cron: "*/5 1-3,5-7 * * 1-5"
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          cd stock-monitor
+          pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          WXPUSHER_APP_TOKEN: ${{ secrets.WXPUSHER_APP_TOKEN }}
+          WXPUSHER_UIDS: ${{ secrets.WXPUSHER_UIDS }}
+        run: |
+          cd stock-monitor
+          python monitor.py
